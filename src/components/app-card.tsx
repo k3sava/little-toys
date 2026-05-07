@@ -105,8 +105,12 @@ export function AppCard({
       </a>
     );
   }
+  // Internal hub-aggregated toys are plain HTML files served from /<slug>/
+  // (not Next.js routes), so disable Next.js prefetch — it would try to
+  // fetch index.txt for RSC payloads that don't exist and surface 404s in
+  // the console.
   return (
-    <Link href={href} className={className} style={style}>
+    <Link href={href} prefetch={false} className={className} style={style}>
       {body}
     </Link>
   );
