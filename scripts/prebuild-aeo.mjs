@@ -75,6 +75,7 @@ async function writeLlms(groups) {
     "",
     "## Agent discovery",
     "",
+    `- [toys.json](${SITE}/toys.json): machine-readable catalog of all toys grouped by category.`,
     `- [Agent permissions](${SITE}/.well-known/agent-permissions.json): use rights, attribution, license.`,
     `- [API catalog](${SITE}/.well-known/api-catalog): RFC 9727 linkset to discoverable resources.`,
     `- [Agent skills](${SITE}/.well-known/agent-skills/index.json): Agent Skills Discovery v0.2 index.`,
@@ -101,6 +102,32 @@ async function writeLlms(groups) {
   lines.push("");
   lines.push("MIT. Cite freely with attribution to Kesava.");
   await writeFile(join(PUB, "llms.txt"), lines.join("\n"));
+}
+
+async function writeToysJson(groups) {
+  const all = groups.flatMap((g) => g.apps);
+  const today = new Date().toISOString().slice(0, 10);
+  const out = {
+    $schema: `${SITE}/toys.schema.json`,
+    site: SITE,
+    license: "MIT",
+    last_updated: today,
+    counts: { toys: all.length, categories: groups.length },
+    categories: groups.map((g) => ({
+      label: g.label,
+      slug: g.label.toLowerCase().replace(/\s+/g, "-"),
+      toys: g.apps.map((t) => t.slug || t.title).filter(Boolean),
+    })),
+    toys: all.map((t) => ({
+      slug: t.slug || (t.href || "").replace(/^\//, "").replace(/\/$/, ""),
+      title: t.title,
+      url: t.external ? t.href : `${SITE}${t.href}`,
+      external: !!t.external,
+      badge: t.badge,
+      description: t.description,
+    })),
+  };
+  await writeFile(join(PUB, "toys.json"), JSON.stringify(out, null, 2));
 }
 
 async function writeAgentPermissions(groups) {
@@ -169,8 +196,9 @@ async function main() {
   const groups = await parseToys();
   console.log(`prebuild-aeo: ${groups.flatMap((g) => g.apps).length} toys, ${groups.length} categories`);
   await writeLlms(groups);
+  await writeToysJson(groups);
   await writeAgentPermissions(groups);
   await writeOg();
-  console.log("prebuild-aeo: wrote llms.txt, agent-permissions.json, og/default.svg");
+  console.log("prebuild-aeo: wrote llms.txt, toys.json, agent-permissions.json, og/default.svg");
 }
 main().catch((e) => { console.error(e); process.exit(1); });
