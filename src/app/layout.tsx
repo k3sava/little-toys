@@ -48,7 +48,7 @@ const notoSerifJP = Noto_Serif_JP({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://toys.iamkesava.com"),
-  title: "little toys — creative experiments by Kesava",
+  title: "little toys, creative experiments by Kesava",
   description:
     "Creative experiments and interactive toys that run in your browser. Music, visuals, physics, generative art.",
   authors: [{ name: "Kesava" }],
