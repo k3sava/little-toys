@@ -30,6 +30,7 @@ export function rootLd() {
         sameAs: [
           "https://tools.iamkesava.com/",
           "https://apps.iamkesava.com/",
+          "https://codex.iamkesava.com/",
           "https://iamkesava.com/",
         ],
       },

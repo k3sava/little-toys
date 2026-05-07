@@ -27,7 +27,7 @@ export function ToysHubContent() {
         ]}
       />
 
-      <div className="mx-auto w-[92%] max-w-[1600px] py-12 sm:py-16">
+      <main id="main" className="mx-auto w-[92%] max-w-[1600px] py-12 sm:py-16">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: "var(--kami-text)" }}>
             Toys
@@ -126,8 +126,8 @@ export function ToysHubContent() {
           ))
         )}
 
-        <Footer />
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }
