@@ -99,6 +99,9 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem("theme");if(!t){t="brutalist";localStorage.setItem("theme",t)}if(t&&t!=="default")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}catch(e){}})()`,
           }}
         />
+        <link rel="service-doc" href="https://toys.iamkesava.com/llms.txt" />
+        <link rel="api-catalog" href="https://toys.iamkesava.com/.well-known/api-catalog" />
+        <link rel="describedby" href="https://toys.iamkesava.com/.well-known/agent-permissions.json" />
         <JsonLd data={rootLd()} />
       </head>
       <body className="font-sans antialiased">

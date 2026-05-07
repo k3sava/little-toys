@@ -1,0 +1,12 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://toys.iamkesava.com/",
+      "links": [
+        { "rel": "service-doc", "href": "https://toys.iamkesava.com/llms.txt" },
+        { "rel": "describedby", "href": "https://toys.iamkesava.com/.well-known/agent-permissions.json" },
+        { "rel": "sitemap", "href": "https://toys.iamkesava.com/sitemap.xml" }
+      ]
+    }
+  ]
+}
