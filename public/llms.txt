@@ -1,0 +1,42 @@
+# little toys
+
+> Creative experiments by Kesava. Interactive audio toys, generative visuals, physics simulations, CSS art. All free, all in your browser.
+
+Counts: 11 toys across 5 categories.
+
+## Index
+
+- [Hub](https://toys.iamkesava.com/): all toys grouped by category.
+- [Sitemap](https://toys.iamkesava.com/sitemap.xml)
+
+## Categories
+
+### Audio
+
+- [sonicc](https://k3sava.github.io/sonicc/): Keys, drums, pattern sequencer, sampler, and mic recorder. 16 presets, 9 waveforms, 12 FX, stereo knobs, MIDI support, and WAV export.
+- [Stem Studio](https://apps.iamkesava.com/playground/stem-studio): Upload any song and split it into vocals, drums, bass, and other stems with AI. Effects, pitch shift, time stretch, sample maker, and mix export.
+- [Plink](https://k3sava.github.io/plink/): Drop marbles and hear them play. A pentatonic plinko board where every bounce is a note. Click pegs to toggle them.
+- [Synth Pad](https://k3sava.github.io/synth-pad/): Touch or click and drag to play. An XY pad instrument with pentatonic tuning and warm oscillators.
+
+### Visual
+
+- [Kaleidoscopic](https://k3sava.github.io/kaleidoscopic/): Upload any image and watch it fold into living geometry. 8 symmetry patterns, real-time WebGL rendering, video recording.
+- [Aurora](https://k3sava.github.io/aurora/): Move your cursor through living light. An interactive aurora borealis rendered in real time.
+- [String Art](https://k3sava.github.io/string-art/): Modular multiplication on geometric shapes creates impossibly intricate patterns. Move your cursor to shape the strings.
+
+### Simulation
+
+- [Gravity Type](https://k3sava.github.io/gravity-type/): Type anything and watch it fall. Letters tumble, stack, and scatter with real physics. Click to explode.
+- [Particle Life](https://k3sava.github.io/particle-life/): Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe.
+
+### Generative
+
+- [Aurea](https://k3sava.github.io/aurea/): Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.
+
+### Craft
+
+- [Zen Garden](https://apps.iamkesava.com/playground/zen-garden): Ink & Void, a CSS Zen Garden submission. 1800+ lines of pure CSS: scroll-driven animations, oklch color, @property, subgrid. Zero images, zero JS.
+
+## License
+
+MIT. Cite freely with attribution to Kesava.

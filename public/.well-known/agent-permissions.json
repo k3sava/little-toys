@@ -1,0 +1,29 @@
+{
+  "$schema": "https://addyosmani.com/agent-permissions/schema.json",
+  "policy_version": "1.0",
+  "site": "https://toys.iamkesava.com",
+  "license": "MIT",
+  "attribution_required": true,
+  "allowed_uses": [
+    "read",
+    "summarize",
+    "cite",
+    "answer-engine-indexing",
+    "training-with-attribution"
+  ],
+  "disallowed_uses": [
+    "republish-without-attribution"
+  ],
+  "preferred_format": "html",
+  "canonical_index": "https://toys.iamkesava.com/sitemap.xml",
+  "discovery": [
+    "https://toys.iamkesava.com/llms.txt",
+    "https://toys.iamkesava.com/sitemap.xml",
+    "https://toys.iamkesava.com/robots.txt"
+  ],
+  "counts": {
+    "toys": 11,
+    "categories": 5
+  },
+  "last_updated": "2026-05-07"
+}

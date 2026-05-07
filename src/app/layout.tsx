@@ -9,6 +9,7 @@ import {
 import { BlobCanvas } from "@/components/blob-canvas";
 import { ShareButton } from "@/components/share-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { JsonLd, rootLd } from "@/lib/json-ld";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -53,18 +54,21 @@ export const metadata: Metadata = {
   authors: [{ name: "Kesava" }],
   alternates: { canonical: "https://toys.iamkesava.com" },
   openGraph: {
-    title: "little toys — creative experiments by Kesava",
+    title: "little toys, creative experiments by Kesava",
     description:
       "Creative experiments and interactive toys that run in your browser.",
     url: "https://toys.iamkesava.com",
     siteName: "little toys",
     type: "website",
+    images: [{ url: "https://toys.iamkesava.com/og/default.svg", width: 1200, height: 630 }],
   },
   twitter: {
-    card: "summary",
-    title: "little toys — creative experiments by Kesava",
+    card: "summary_large_image",
+    title: "little toys, creative experiments by Kesava",
     description: "Creative experiments and interactive toys in your browser.",
+    images: ["https://toys.iamkesava.com/og/default.svg"],
   },
+  themeColor: "#0f0f1e",
 };
 
 export default function RootLayout({
@@ -84,6 +88,7 @@ export default function RootLayout({
             __html: `(function(){try{var t=localStorage.getItem("theme");if(!t){t="brutalist";localStorage.setItem("theme",t)}if(t&&t!=="default")document.documentElement.setAttribute("data-theme",t);else document.documentElement.removeAttribute("data-theme")}catch(e){}})()`,
           }}
         />
+        <JsonLd data={rootLd()} />
       </head>
       <body className="font-sans antialiased">
         <div className="kami-mobile-bar" aria-hidden="true" />
