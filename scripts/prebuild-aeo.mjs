@@ -15,38 +15,58 @@ const TOYS_FILE = join(ROOT, "src", "data", "toys.ts");
 const SITE = "https://toys.iamkesava.com";
 
 async function parseToys() {
+  // Parse src/data/toys.ts to recover the group → apps tree. Each toy entry
+  // is a single-line object with title/badge/description/href + optional slug.
   const src = await readFile(TOYS_FILE, "utf8");
   const groupsMatch = src.match(/export const groups[^=]*=\s*\[([\s\S]*?)\n\];/);
   if (!groupsMatch) throw new Error("could not locate groups array");
-  const body = groupsMatch[1];
-  // Each group has a label + apps array. Extract apps inline; we don't need
-  // group structure for llms.txt directly (we build sections from labels).
-  const groupBlocks = body.split(/^\s*\{\s*$/m).slice(1);
   const groups = [];
-  for (const block of body.split(/\n\s*\{\s*\n/).slice(1)) {
+  for (const block of groupsMatch[1].split(/\n\s*\{\s*\n/).slice(1)) {
     const labelM = block.match(/label:\s*"([^"]+)"/);
     if (!labelM) continue;
     const appsM = block.match(/apps:\s*\[([\s\S]*?)\n\s{4}\],?/);
     if (!appsM) continue;
     const apps = [];
-    const re = /\{\s*title:\s*"([^"]+)"\s*,\s*badge:\s*"([^"]+)"\s*,\s*description:\s*"([^"]+)"\s*,\s*href:\s*"([^"]+)"/g;
+    // Parse each toy entry. Slug is optional + may appear before or after
+    // title; href + description + badge + title are required.
+    const lineRe = /\{\s*([^}]+)\}/g;
     let m;
-    while ((m = re.exec(appsM[1])) !== null) {
-      apps.push({ title: m[1], badge: m[2], description: m[3], href: m[4] });
+    while ((m = lineRe.exec(appsM[1])) !== null) {
+      const inner = m[1];
+      const get = (k) => (inner.match(new RegExp(`${k}\\s*:\\s*"([^"]*)"`)) || [])[1] || "";
+      const title = get("title");
+      if (!title) continue;
+      apps.push({
+        title,
+        badge: get("badge"),
+        description: get("description"),
+        href: get("href"),
+        slug: get("slug"),
+        external: /external:\s*true/.test(inner),
+      });
     }
     groups.push({ label: labelM[1], apps });
   }
   return groups;
 }
 
+function canonicalHref(t) {
+  // Internal aggregated toys live under SITE; external toys keep their own URL.
+  if (t.external) return t.href;
+  if (t.slug) return `${SITE}/${t.slug}/`;
+  if (t.href.startsWith("/")) return SITE + t.href;
+  return t.href;
+}
 async function writeLlms(groups) {
   const all = groups.flatMap((g) => g.apps);
+  const internal = all.filter((t) => !t.external);
+  const external = all.filter((t) => t.external);
   const lines = [
     "# little toys",
     "",
-    "> Creative experiments by Kesava. Interactive audio toys, generative visuals, physics simulations, CSS art. All free, all in your browser.",
+    "> Creative experiments by Kesava. Interactive audio toys, generative visuals, physics simulations, CSS art. All free, all in your browser. Every toy below has its own canonical URL on toys.iamkesava.com; the source code lives in standalone GitHub repos for code-share.",
     "",
-    `Counts: ${all.length} toys across ${groups.length} categories.`,
+    `Counts: ${all.length} toys across ${groups.length} categories. ${internal.length} hosted on toys.iamkesava.com, ${external.length} cross-linked to apps.iamkesava.com.`,
     "",
     "## Index",
     "",
@@ -60,10 +80,17 @@ async function writeLlms(groups) {
     lines.push(`### ${g.label}`);
     lines.push("");
     for (const t of g.apps) {
-      lines.push(`- [${t.title}](${t.href}): ${t.description}`);
+      const url = canonicalHref(t);
+      const repo = t.slug ? ` (source: https://github.com/k3sava/${t.slug})` : "";
+      lines.push(`- [${t.title}](${url}): ${t.description}${repo}`);
     }
     lines.push("");
   }
+  lines.push("## URL templates");
+  lines.push("");
+  lines.push(`- Toy: \`${SITE}/<slug>/\` (canonical, hub-aggregated)`);
+  lines.push(`- Source code: \`https://github.com/k3sava/<slug>\``);
+  lines.push("");
   lines.push("## License");
   lines.push("");
   lines.push("MIT. Cite freely with attribution to Kesava.");

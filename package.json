@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/prebuild-aeo.mjs",
+    "prebuild": "node scripts/aggregate-toys.mjs && node scripts/prebuild-aeo.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

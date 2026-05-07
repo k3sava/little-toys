@@ -48,18 +48,27 @@ export function rootLd() {
         "@type": "ItemList",
         name: "Creative experiments",
         numberOfItems: allToys.length,
-        itemListElement: allToys.map((toy, i) => ({
-          "@type": "ListItem",
-          position: i + 1,
-          item: {
+        itemListElement: allToys.map((toy, i) => {
+          const canonical = toy.slug && !toy.external
+            ? `${SITE}/${toy.slug}/`
+            : toy.href.startsWith("/")
+              ? SITE + toy.href
+              : toy.href;
+          const work = {
             "@type": "CreativeWork",
             name: toy.title,
             description: toy.description,
-            url: toy.href,
+            url: canonical,
             keywords: toy.badge,
             author: { "@type": "Person", name: "Kesava" },
-          },
-        })),
+            ...(toy.slug ? { codeRepository: `https://github.com/k3sava/${toy.slug}` } : {}),
+          };
+          return {
+            "@type": "ListItem",
+            position: i + 1,
+            item: work,
+          };
+        }),
       },
       // FAQ block — answers the questions an AI agent would ask about this hub.
       {
