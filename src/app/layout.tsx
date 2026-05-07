@@ -68,6 +68,17 @@ export const metadata: Metadata = {
     description: "Creative experiments and interactive toys in your browser.",
     images: ["https://toys.iamkesava.com/og/default.svg"],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
   themeColor: "#0f0f1e",
 };
 

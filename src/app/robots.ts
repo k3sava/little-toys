@@ -1,15 +1,31 @@
 import type { MetadataRoute } from "next";
 
 const aiAgents = [
-  "GPTBot",
-  "Google-Extended",
-  "ClaudeBot",
-  "anthropic-ai",
-  "PerplexityBot",
-  "CCBot",
+  "Googlebot",
+  "Bingbot",
+  "Applebot",
+  "Claude-SearchBot",
+  "Claude-User",
   "ChatGPT-User",
   "OAI-SearchBot",
+  "Perplexity-User",
+  "PerplexityBot",
+  "DuckAssistBot",
+  "MistralAI-User",
+  "Google-CloudVertexBot",
+  "GPTBot",
+  "ClaudeBot",
+  "Google-Extended",
   "Applebot-Extended",
+  "anthropic-ai",
+  "CCBot",
+  "Amazonbot",
+  "Bytespider",
+  "FacebookBot",
+  "meta-externalagent",
+  "PetalBot",
+  "archive.org_bot",
+  "ia_archiver",
 ];
 
 export default function robots(): MetadataRoute.Robots {
