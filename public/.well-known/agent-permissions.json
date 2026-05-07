@@ -21,6 +21,11 @@
     "https://toys.iamkesava.com/sitemap.xml",
     "https://toys.iamkesava.com/robots.txt"
   ],
+  "related_sites": {
+    "tools": "https://tools.iamkesava.com",
+    "apps": "https://apps.iamkesava.com",
+    "apex": "https://iamkesava.com"
+  },
   "counts": {
     "toys": 11,
     "categories": 5

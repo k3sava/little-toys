@@ -27,6 +27,11 @@ export function rootLd() {
           "Creative experiments by Kesava: interactive audio toys, generative visuals, physics simulations, and CSS art.",
         url: SITE + "/",
         publisher: { "@id": SITE + "/#org" },
+        sameAs: [
+          "https://tools.iamkesava.com/",
+          "https://apps.iamkesava.com/",
+          "https://iamkesava.com/",
+        ],
       },
       {
         "@type": "Organization",

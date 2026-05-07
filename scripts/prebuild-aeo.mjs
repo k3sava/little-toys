@@ -111,6 +111,11 @@ async function writeAgentPermissions(groups) {
     preferred_format: "html",
     canonical_index: `${SITE}/sitemap.xml`,
     discovery: [`${SITE}/llms.txt`, `${SITE}/sitemap.xml`, `${SITE}/robots.txt`],
+    related_sites: {
+      tools: "https://tools.iamkesava.com",
+      apps: "https://apps.iamkesava.com",
+      apex: "https://iamkesava.com",
+    },
     counts: { toys: all.length, categories: groups.length },
     last_updated: new Date().toISOString().slice(0, 10),
   };

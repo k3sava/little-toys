@@ -34,3 +34,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Aggregated from external toy repos at build time (scripts/aggregate-toys.mjs)
+public/sonicc/
+public/plink/
+public/synth-pad/
+public/kaleidoscopic/
+public/aurora/
+public/string-art/
+public/gravity-type/
+public/particle-life/
+public/aurea/
