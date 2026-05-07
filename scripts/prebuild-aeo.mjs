@@ -73,6 +73,12 @@ async function writeLlms(groups) {
     `- [Hub](${SITE}/): all toys grouped by category.`,
     `- [Sitemap](${SITE}/sitemap.xml)`,
     "",
+    "## Agent discovery",
+    "",
+    `- [Agent permissions](${SITE}/.well-known/agent-permissions.json): use rights, attribution, license.`,
+    `- [API catalog](${SITE}/.well-known/api-catalog): RFC 9727 linkset to discoverable resources.`,
+    `- [Agent skills](${SITE}/.well-known/agent-skills/index.json): Agent Skills Discovery v0.2 index.`,
+    "",
     "## Categories",
     "",
   ];

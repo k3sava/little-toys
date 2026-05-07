@@ -9,6 +9,12 @@ Counts: 11 toys across 5 categories. 9 hosted on toys.iamkesava.com, 2 cross-lin
 - [Hub](https://toys.iamkesava.com/): all toys grouped by category.
 - [Sitemap](https://toys.iamkesava.com/sitemap.xml)
 
+## Agent discovery
+
+- [Agent permissions](https://toys.iamkesava.com/.well-known/agent-permissions.json): use rights, attribution, license.
+- [API catalog](https://toys.iamkesava.com/.well-known/api-catalog): RFC 9727 linkset to discoverable resources.
+- [Agent skills](https://toys.iamkesava.com/.well-known/agent-skills/index.json): Agent Skills Discovery v0.2 index.
+
 ## Categories
 
 ### Audio
