@@ -2,7 +2,7 @@
 
 > Creative experiments by Kesava. Interactive audio toys, generative visuals, physics simulations, CSS art. All free, all in your browser. Every toy below has its own canonical URL on toys.iamkesava.com; the source code lives in standalone GitHub repos for code-share.
 
-Counts: 11 toys across 5 categories. 9 hosted on toys.iamkesava.com, 2 cross-linked to apps.iamkesava.com.
+Counts: 12 toys across 5 categories. 10 hosted on toys.iamkesava.com, 2 cross-linked to apps.iamkesava.com.
 
 ## Index
 
@@ -39,6 +39,7 @@ Counts: 11 toys across 5 categories. 9 hosted on toys.iamkesava.com, 2 cross-lin
 ### Generative
 
 - [Aurea](https://toys.iamkesava.com/aurea/): Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math. (source: https://github.com/k3sava/aurea)
+- [Poster Maker](https://toys.iamkesava.com/poster-maker/): Type a phrase, pick a feeling, export a poster. Nine real-time text-field effects — breath, murmuration, smoke, tide, grain, mycelium, bloom, condensation, phantom. PNG or 30s video. (source: https://github.com/k3sava/poster-maker)
 
 ### Craft
 

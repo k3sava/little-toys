@@ -33,6 +33,7 @@ const TOYS = [
   { slug: "gravity-type",  name: "Gravity Type",  category: "Simulation", keywords: "physics, type, gravity", description: "Type anything and watch it fall. Letters tumble, stack, and scatter with real physics. Click to explode." },
   { slug: "particle-life", name: "Particle Life", category: "Simulation", keywords: "particles, simulation, emergence", description: "Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe." },
   { slug: "aurea",         name: "Aurea",         category: "Generative", keywords: "math art, fibonacci, parametric", description: "Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math." },
+  { slug: "poster-maker",  name: "Poster Maker",  category: "Generative", keywords: "typography, poster, generative, noise", description: "Type a phrase, pick a feeling, export a poster. Nine real-time text-field effects — breath, murmuration, smoke, tide, grain, mycelium, bloom, condensation, phantom. PNG or 30s video." },
 ];
 
 async function fetchToyHtml(slug) {
