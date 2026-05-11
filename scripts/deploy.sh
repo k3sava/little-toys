@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build static bundle and publish to the gh-pages branch.
-# GH Pages serves tools.iamkesava.com from that branch.
+# GH Pages serves toys.iamkesava.com from that branch.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -14,7 +14,7 @@ trap 'rm -rf "$work"' EXIT
 
 cp -R out/. "$work/"
 touch "$work/.nojekyll"
-echo "tools.iamkesava.com" > "$work/CNAME"
+echo "toys.iamkesava.com" > "$work/CNAME"
 
 cd "$work"
 git init -q -b gh-pages
