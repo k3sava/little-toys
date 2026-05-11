@@ -33,7 +33,14 @@ const TOYS = [
   { slug: "gravity-type",  name: "Gravity Type",  category: "Simulation", keywords: "physics, type, gravity", description: "Type anything and watch it fall. Letters tumble, stack, and scatter with real physics. Click to explode." },
   { slug: "particle-life", name: "Particle Life", category: "Simulation", keywords: "particles, simulation, emergence", description: "Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe." },
   { slug: "aurea",         name: "Aurea",         category: "Generative", keywords: "math art, fibonacci, parametric", description: "Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math." },
-  { slug: "poster-maker",  name: "Poster Maker",  category: "Generative", keywords: "typography, poster, generative, noise", description: "Type a phrase, pick a feeling, export a poster. Nine real-time text-field effects — breath, murmuration, smoke, tide, grain, mycelium, bloom, condensation, phantom. PNG or 30s video." },
+  {
+    slug: "form",
+    name: "FORM",
+    category: "Generative",
+    keywords: "typography, poster, generative, design systems",
+    description: "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video.",
+    subpaths: ["", "swiss", "editorial", "shared/style.css", "shared/app.js", "shared/parse.js", "shared/philosophies/swiss.js", "shared/philosophies/editorial.js"],
+  },
 ];
 
 async function fetchToyHtml(slug) {
@@ -130,17 +137,46 @@ async function main() {
   let ok = 0, fail = 0;
   for (const toy of TOYS) {
     const dir = join(PUB, toy.slug);
-    try {
-      const html = await fetchToyHtml(toy.slug);
-      const enriched = injectCanonical(html, toy.slug, toy.name, toy.description, toy.keywords);
-      await rm(dir, { recursive: true, force: true });
-      await mkdir(dir, { recursive: true });
-      await writeFile(join(dir, "index.html"), enriched);
+    await rm(dir, { recursive: true, force: true });
+    await mkdir(dir, { recursive: true });
+
+    const subpaths = toy.subpaths || [""];
+    let allOk = true;
+    for (const sub of subpaths) {
+      try {
+        const isAsset = sub.endsWith(".css") || sub.endsWith(".js");
+        const fetchPath = sub === "" ? "index.html" : (isAsset ? sub : `${sub}/index.html`);
+
+        let content = null;
+        for (const branch of ["main", "master"]) {
+          const url = `${GH}/${toy.slug}/${branch}/${fetchPath}`;
+          const res = await fetch(url, { headers: { "User-Agent": "little-toys-aggregator" } });
+          if (res.ok) { content = await res.text(); break; }
+        }
+        if (content === null) throw new Error(`could not fetch ${fetchPath}`);
+
+        const localPath = sub === "" ? "index.html" : (isAsset ? sub : `${sub}/index.html`);
+        const fullLocal = join(dir, localPath);
+        await mkdir(join(fullLocal, ".."), { recursive: true });
+
+        if (isAsset) {
+          await writeFile(fullLocal, content);
+        } else {
+          const subSlug = toy.slug + (sub ? "/" + sub : "");
+          const pageName = sub === "" ? toy.name : `${toy.name} — ${sub[0].toUpperCase() + sub.slice(1)}`;
+          const enriched = injectCanonical(content, subSlug, pageName, toy.description, toy.keywords);
+          await writeFile(fullLocal, enriched);
+        }
+      } catch (e) {
+        console.log(`  ✗ ${toy.slug}/${sub || "(root)"}: ${e.message}`);
+        allOk = false;
+      }
+    }
+    if (allOk) {
       await writeFile(join(dir, "og.svg"), ogSvg(toy));
-      console.log(`  ✓ ${toy.slug} (${enriched.length} bytes)`);
+      console.log(`  ✓ ${toy.slug} (${subpaths.length} path${subpaths.length===1?'':'s'})`);
       ok++;
-    } catch (e) {
-      console.log(`  ✗ ${toy.slug}: ${e.message}`);
+    } else {
       fail++;
     }
   }
