@@ -39,7 +39,7 @@ const TOYS = [
     category: "Generative",
     keywords: "typography, poster, generative, design systems",
     description: "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video.",
-    subpaths: ["", "swiss", "editorial", "brutalist", "kinetic", "painterly", "mycelium", "blend", "shared/style.css", "shared/app.js", "shared/parse.js", "shared/philosophies/swiss.js", "shared/philosophies/editorial.js", "shared/philosophies/brutalist.js", "shared/philosophies/kinetic.js", "shared/philosophies/painterly.js", "shared/philosophies/mycelium.js", "shared/philosophies/blend.js"],
+    subpaths: ["", "swiss", "editorial", "brutalist", "kinetic", "painterly", "mycelium", "blend", "shared/style.css", "shared/app.js", "shared/parse.js", "shared/layout.js", "shared/philosophies/swiss.js", "shared/philosophies/editorial.js", "shared/philosophies/brutalist.js", "shared/philosophies/kinetic.js", "shared/philosophies/painterly.js", "shared/philosophies/mycelium.js", "shared/philosophies/blend.js", "shared/knowledge/designers.json"],
   },
 ];
 
@@ -144,7 +144,7 @@ async function main() {
     let allOk = true;
     for (const sub of subpaths) {
       try {
-        const isAsset = sub.endsWith(".css") || sub.endsWith(".js");
+        const isAsset = sub.endsWith(".css") || sub.endsWith(".js") || sub.endsWith(".json");
         const fetchPath = sub === "" ? "index.html" : (isAsset ? sub : `${sub}/index.html`);
 
         let content = null;
