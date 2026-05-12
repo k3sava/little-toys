@@ -46,7 +46,7 @@ const TOYS = [
     name: "wordart",
     category: "Generative",
     keywords: "typography, type, effects, canvas, generative",
-    description: "Type a phrase, switch effects. Line, slice, blur, dither, type — five canvas typography effects with shared chrome, animate + interactive modes, PNG and 30s MP4 export.",
+    description: "Type a phrase, switch effects. Eight canvas typography effects with shared chrome, animate + interactive modes, PNG and 15s loopable MP4 export. Keyboard shortcuts to switch effects (1-8), theme (T), and more.",
     subpaths: [
       "",
       "line", "line/effect.js", "line/effect.css",
@@ -54,9 +54,12 @@ const TOYS = [
       "blur", "blur/effect.js",
       "dither", "dither/effect.js",
       "type", "type/effect.js",
+      "halftone", "halftone/effect.js",
+      "glitch", "glitch/effect.js",
+      "mesh", "mesh/effect.js",
       "shared/chrome.css", "shared/gui.css", "shared/gui.js",
       "shared/theme.js", "shared/state.js", "shared/export.js",
-      "shared/theme-tokens.css",
+      "shared/keys.js", "shared/theme-tokens.css",
     ],
   },
 ];
