@@ -41,6 +41,24 @@ const TOYS = [
     description: "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video.",
     subpaths: ["", "swiss", "editorial", "brutalist", "kinetic", "painterly", "mycelium", "blend", "shared/style.css", "shared/app.js", "shared/parse.js", "shared/layout.js", "shared/philosophies/swiss.js", "shared/philosophies/editorial.js", "shared/philosophies/brutalist.js", "shared/philosophies/kinetic.js", "shared/philosophies/painterly.js", "shared/philosophies/mycelium.js", "shared/philosophies/blend.js", "shared/knowledge/designers.json"],
   },
+  {
+    slug: "wordart",
+    name: "wordart",
+    category: "Generative",
+    keywords: "typography, type, effects, canvas, generative",
+    description: "Type a phrase, switch effects. Line, slice, blur, dither, type — five canvas typography effects with shared chrome, animate + interactive modes, PNG and 30s MP4 export.",
+    subpaths: [
+      "",
+      "line", "line/effect.js", "line/effect.css",
+      "slice", "slice/effect.js",
+      "blur", "blur/effect.js",
+      "dither", "dither/effect.js",
+      "type", "type/effect.js",
+      "shared/chrome.css", "shared/gui.css", "shared/gui.js",
+      "shared/theme.js", "shared/state.js", "shared/export.js",
+      "shared/theme-tokens.css",
+    ],
+  },
 ];
 
 async function fetchToyHtml(slug) {

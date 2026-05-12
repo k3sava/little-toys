@@ -49,7 +49,7 @@ export const groups: ToyGroup[] = [
     label: "Generative",
     apps: [
       { slug: "aurea", title: "Aurea", badge: "math art", description: "Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.", href: "/aurea/" },
-      { slug: "poster-maker", title: "Poster Maker", badge: "typography", description: "Type a phrase, pick a feeling, export a poster. Nine real-time text-field effects — breath, murmuration, smoke, tide, grain, mycelium, bloom, condensation, phantom. PNG or 30s video.", href: "/poster-maker/" },
+      { slug: "form", title: "FORM", badge: "typography", description: "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video.", href: "/form/" },
     ],
   },
   {
