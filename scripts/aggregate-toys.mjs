@@ -14,6 +14,7 @@
 // Run via `npm run prebuild` (auto-runs before `next build`).
 
 import { writeFile, mkdir, rm } from "node:fs/promises";
+import { Buffer } from "node:buffer";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -198,16 +199,28 @@ async function main() {
 
     const subpaths = toy.subpaths || [""];
     let allOk = true;
+    // Asset classification:
+    //   directory  — sub is a bare slug like "line" or "shared", aggregator
+    //                fetches `${sub}/index.html` and rewrites the HTML.
+    //   text-asset — code/markup: .css .js .json .html. Fetched verbatim.
+    //   binary     — images/video/font: .png .jpg .mp4 etc. Fetched as bytes.
+    const TEXT_EXT = /\.(css|js|json|html)$/i;
+    const BIN_EXT  = /\.(png|jpe?g|gif|webp|svg|ico|mp4|webm|mov|m4v|woff2?|ttf|otf|wasm)$/i;
     for (const sub of subpaths) {
       try {
-        const isAsset = sub.endsWith(".css") || sub.endsWith(".js") || sub.endsWith(".json");
+        const isText = TEXT_EXT.test(sub);
+        const isBin  = BIN_EXT.test(sub);
+        const isAsset = isText || isBin;
         const fetchPath = sub === "" ? "index.html" : (isAsset ? sub : `${sub}/index.html`);
 
         let content = null;
         for (const branch of ["main", "master"]) {
           const url = `${GH}/${toy.slug}/${branch}/${fetchPath}`;
           const res = await fetch(url, { headers: { "User-Agent": "little-toys-aggregator" } });
-          if (res.ok) { content = await res.text(); break; }
+          if (res.ok) {
+            content = isBin ? Buffer.from(await res.arrayBuffer()) : await res.text();
+            break;
+          }
         }
         if (content === null) throw new Error(`could not fetch ${fetchPath}`);
 
@@ -215,9 +228,19 @@ async function main() {
         const fullLocal = join(dir, localPath);
         await mkdir(join(fullLocal, ".."), { recursive: true });
 
-        if (isAsset) {
+        if (isBin) {
+          await writeFile(fullLocal, content);
+        } else if (isText) {
+          // HTML text-assets (e.g. /pixart/<effect>/index.html) get canonical
+          // injection same as the toy root. CSS/JS/JSON pass through verbatim.
+          if (sub.endsWith(".html")) {
+            const subSlug = toy.slug + "/" + sub.replace(/\/?index\.html$/, "");
+            const pageName = `${toy.name} — ${sub.split("/")[0]}`;
+            content = injectCanonical(content, subSlug, pageName, toy.description, toy.keywords);
+          }
           await writeFile(fullLocal, content);
         } else {
+          // Directory — fetched its index.html, write to <sub>/index.html.
           const subSlug = toy.slug + (sub ? "/" + sub : "");
           const pageName = sub === "" ? toy.name : `${toy.name} — ${sub[0].toUpperCase() + sub.slice(1)}`;
           const enriched = injectCanonical(content, subSlug, pageName, toy.description, toy.keywords);
