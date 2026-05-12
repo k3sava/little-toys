@@ -50,6 +50,7 @@ export const groups: ToyGroup[] = [
     apps: [
       { slug: "aurea", title: "Aurea", badge: "math art", description: "Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.", href: "/aurea/" },
       { slug: "form", title: "FORM", badge: "typography", description: "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video.", href: "/form/" },
+      { slug: "wordart", title: "wordart", badge: "typography", description: "Type a phrase, pick an effect, export it. Eight canvas effects (line, slice, blur, dither, type, halftone, glitch, mesh) share one chrome with keyboard shortcuts, theme cycling, PNG snapshots, and a 15 s offline MP4 render.", href: "/wordart/" },
     ],
   },
   {
