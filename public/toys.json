@@ -2,9 +2,9 @@
   "$schema": "https://toys.iamkesava.com/toys.schema.json",
   "site": "https://toys.iamkesava.com",
   "license": "MIT",
-  "last_updated": "2026-05-11",
+  "last_updated": "2026-05-12",
   "counts": {
-    "toys": 12,
+    "toys": 14,
     "categories": 5
   },
   "categories": [
@@ -40,7 +40,9 @@
       "slug": "generative",
       "toys": [
         "aurea",
-        "poster-maker"
+        "form",
+        "wordart",
+        "pixart"
       ]
     },
     {
@@ -133,12 +135,28 @@
       "description": "Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math."
     },
     {
-      "slug": "poster-maker",
-      "title": "Poster Maker",
-      "url": "https://toys.iamkesava.com/poster-maker/",
+      "slug": "form",
+      "title": "FORM",
+      "url": "https://toys.iamkesava.com/form/",
       "external": false,
       "badge": "typography",
-      "description": "Type a phrase, pick a feeling, export a poster. Nine real-time text-field effects — breath, murmuration, smoke, tide, grain, mycelium, bloom, condensation, phantom. PNG or 30s video."
+      "description": "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video."
+    },
+    {
+      "slug": "wordart",
+      "title": "wordart",
+      "url": "https://toys.iamkesava.com/wordart/",
+      "external": false,
+      "badge": "typography",
+      "description": "Type a phrase, pick an effect, export it. Eight canvas effects (line, slice, blur, dither, type, halftone, glitch, mesh) share one chrome with keyboard shortcuts, theme cycling, PNG snapshots, and a 15 s offline MP4 render."
+    },
+    {
+      "slug": "pixart",
+      "title": "pixart",
+      "url": "https://toys.iamkesava.com/pixart/",
+      "external": false,
+      "badge": "image + video",
+      "description": "Drop an image or video, pick an effect. 16 canvas effects reverse-engineered from tooooools.app (ascii, bevel, cellular, crt, displace, distort, dithering, dots, edge, gradients, patterns, recolor, scatter, slide, stack, stippling). 15 s seamless loops, PNG + MP4 export."
     },
     {
       "slug": "https://apps.iamkesava.com/playground/zen-garden",
