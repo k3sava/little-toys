@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dither — wordart</title>
+<link rel="stylesheet" href="../shared/chrome.css">
+<link rel="stylesheet" href="../shared/gui.css">
+<script src="../shared/theme.js"></script>
+
+    <link rel="canonical" href="https://toys.iamkesava.com/wordart/dither/">
+    <meta property="og:url" content="https://toys.iamkesava.com/wordart/dither/">
+    <meta property="og:title" content="wordart — Dither, by Kesava">
+    <meta property="og:description" content="Type a phrase, switch effects. Eight canvas typography effects with shared chrome, animate + interactive modes, PNG and 15s loopable MP4 export. Keyboard shortcuts to switch effects (1-8), theme (T), and more.">
+    <meta property="og:image" content="https://toys.iamkesava.com/wordart/dither/og.svg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="wordart — Dither, by Kesava">
+    <meta name="twitter:description" content="Type a phrase, switch effects. Eight canvas typography effects with shared chrome, animate + interactive modes, PNG and 15s loopable MP4 export. Keyboard shortcuts to switch effects (1-8), theme (T), and more.">
+    <meta name="twitter:image" content="https://toys.iamkesava.com/wordart/dither/og.svg">
+    <meta name="author" content="Kesava">
+    <meta name="description" content="Type a phrase, switch effects. Eight canvas typography effects with shared chrome, animate + interactive modes, PNG and 15s loopable MP4 export. Keyboard shortcuts to switch effects (1-8), theme (T), and more.">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CreativeWork","@id":"https://toys.iamkesava.com/wordart/dither/","name":"wordart — Dither","description":"Type a phrase, switch effects. Eight canvas typography effects with shared chrome, animate + interactive modes, PNG and 15s loopable MP4 export. Keyboard shortcuts to switch effects (1-8), theme (T), and more.","url":"https://toys.iamkesava.com/wordart/dither/","keywords":"typography, type, effects, canvas, generative","author":{"@type":"Person","name":"Kesava","url":"https://iamkesava.com"},"publisher":{"@type":"Organization","name":"little toys","url":"https://toys.iamkesava.com"},"codeRepository":"https://github.com/k3sava/wordart/dither","license":"https://opensource.org/licenses/MIT"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iamkesava","item":"https://iamkesava.com"},{"@type":"ListItem","position":2,"name":"toys","item":"https://toys.iamkesava.com/"},{"@type":"ListItem","position":3,"name":"wordart — Dither","item":"https://toys.iamkesava.com/wordart/dither/"}]}]}</script>
+  
+  </head>
+<body class="wa-effect">
+
+<header class="wa-top">
+  <div class="theme-switcher-container">
+    <button class="theme-switcher-pill" aria-label="Cycle theme" title="Cycle theme">
+      <span class="theme-switcher-pill-icon">●</span>
+    </button>
+  </div>
+  <nav class="kami-breadcrumb">
+    <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+    <a href="https://toys.iamkesava.com">toys</a><span class="sep">·</span>
+    <span class="current">wordart</span>
+  </nav>
+  <div class="grow"></div>
+  <nav class="effect-nav">
+    <a href="../line/">line</a>
+    <a href="../slice/">slice</a>
+    <a href="../blur/">blur</a>
+    <a href="../dither/" class="active">dither</a>
+    <a href="../type/">type</a>
+    <a href="../halftone/">halftone</a>
+    <a href="../glitch/">glitch</a>
+    <a href="../mesh/">mesh</a>
+  </nav>
+  <div class="wa-actions">
+    <button id="help-btn" title="Keyboard shortcuts">keys</button>
+    <button id="export-png" title="export png">png</button>
+    <button id="export-mp4" title="record loopable video">video</button>
+  </div>
+</header>
+
+<main class="wa-stage">
+  <canvas id="cv"></canvas>
+</main>
+
+<aside class="wg" id="panel">
+  <div class="wg-title" role="button" tabindex="0">Controls</div>
+  <div class="wg-body">
+    <div class="wg-row wg-slider" data-key="pixelDistortion" data-min="0"  data-max="100" data-step="1"><div class="wg-name">Pixel distortion</div><div class="wg-widget"><div class="wg-track"><div class="wg-fill"></div></div><input type="number" inputmode="numeric"></div></div>
+    <div class="wg-row wg-slider" data-key="pixelSize"       data-min="1"  data-max="20"  data-step="1"><div class="wg-name">Pixel size</div><div class="wg-widget"><div class="wg-track"><div class="wg-fill"></div></div><input type="number" inputmode="numeric"></div></div>
+    <div class="wg-row wg-slider" data-key="pixelSpacing"    data-min="0"  data-max="10"  data-step="1"><div class="wg-name">Pixel spacing</div><div class="wg-widget"><div class="wg-track"><div class="wg-fill"></div></div><input type="number" inputmode="numeric"></div></div>
+    <div class="wg-row wg-slider" data-key="cellRotation"    data-min="0"  data-max="360" data-step="1"><div class="wg-name">Cell rotation</div><div class="wg-widget"><div class="wg-track"><div class="wg-fill"></div></div><input type="number" inputmode="numeric"></div></div>
+    <div class="wg-row wg-bool"   data-key="rounded"><div class="wg-name">Rounded pixels</div><label class="wg-widget"><input type="checkbox"></label></div>
+    <div class="wg-row wg-bool"   data-key="invert"><div class="wg-name">Invert</div><label class="wg-widget"><input type="checkbox"></label></div>
+    <div class="wg-row wg-bool"   data-key="animate"><div class="wg-name">Animate</div><label class="wg-widget"><input type="checkbox"></label></div>
+    <div class="wg-row wg-bool"   data-key="interactive"><div class="wg-name">Interactive</div><label class="wg-widget"><input type="checkbox"></label></div>
+    <div class="wg-row wg-text"   data-key="text"><div class="wg-name">Text</div><div class="wg-widget"><input type="text"></div></div>
+    <div class="wg-row wg-slider" data-key="textSize"        data-min="100" data-max="800" data-step="1"><div class="wg-name">Text size</div><div class="wg-widget"><div class="wg-track"><div class="wg-fill"></div></div><input type="number" inputmode="numeric"></div></div>
+    <div class="wg-row wg-bool"   data-key="bold"><div class="wg-name">Bold</div><label class="wg-widget"><input type="checkbox"></label></div>
+    <div class="wg-row wg-bool"   data-key="italic"><div class="wg-name">Italic</div><label class="wg-widget"><input type="checkbox"></label></div>
+    <div class="wg-row wg-color"  data-key="bg"><div class="wg-name">Background</div><div class="wg-widget"><div class="wg-swatch"><input type="color"></div><input type="text" spellcheck="false"></div></div>
+  </div>
+</aside>
+
+<div class="wa-rec" role="status"><span class="dot"></span><span class="label">Recording</span><div class="track"><div class="bar"></div></div></div>
+
+<footer class="wa-bottom">
+  <nav class="row sister" aria-label="Sister sites">
+    <span><a href="https://apps.iamkesava.com/">apps</a></span><span class="sep">·</span>
+    <span><a href="https://tools.iamkesava.com/">tools</a></span><span class="sep">·</span>
+    <span class="current">toys</span><span class="sep">·</span>
+    <span><a href="https://codex.iamkesava.com/">codex</a></span>
+  </nav>
+  <div class="row made">
+    made by <a href="https://iamkesava.com" rel="author">kesava</a> <span class="sep">·</span> <a href="https://github.com/k3sava/wordart" rel="noopener">github</a>
+  </div>
+</footer>
+
+<script src="../shared/state.js" defer></script>
+<script src="../shared/keys.js" defer></script>
+<script src="../shared/gui.js" defer></script>
+<script src="../shared/export.js" defer></script>
+<script src="effect.js" defer></script>
+</body>
+</html>
