@@ -1,0 +1,264 @@
+/* Canonical chrome for toys.iamkesava.com.
+   Injected into every aggregated toy by scripts/aggregate-toys.mjs.
+   Idempotent: served from /_chrome/ at root, so relative depth doesn't matter.
+
+   Provides:
+   - .kami-breadcrumb-fixed   (top-left)
+   - .theme-switcher-container (top-left, beside breadcrumb)
+   - .kami-shortcut-hint      (top-right)
+   - .kami-footer-fixed       (bottom, fixed)
+   - .kami-splash             (one-shot splash overlay)
+
+   Everything is namespaced and fixed-positioned with very high z-index so
+   it sits above toy UIs without participating in their layout. CSS vars
+   are namespaced under --kami-* and fall back to sensible defaults so we
+   never depend on a toy's tokens. If a toy sets `data-kami-chrome="off"`
+   on <html>, the chrome is hidden entirely. */
+
+:root{
+  --kami-bg:#f6f6f4;
+  --kami-text:#1d1d1f;
+  --kami-text-muted:#4a4a4a;
+  --kami-text-subtle:#bbbbbb;
+  --kami-border:rgba(0,0,0,.08);
+  --kami-link:#6b7280;
+  --kami-link-hover:#1d1d1f;
+  --kami-font-display:'DM Sans', system-ui, -apple-system, sans-serif;
+  --kami-font-body:'DM Sans', system-ui, -apple-system, sans-serif;
+  --kami-font-mono:'JetBrains Mono', ui-monospace, "SF Mono", Menlo, monospace;
+  --kami-bar-bg:rgba(246,246,244,.88);
+  --kami-bar-border:rgba(0,0,0,.08);
+}
+html[data-theme="brutalist"]{
+  --kami-text:#000; --kami-text-muted:#666; --kami-text-subtle:#888;
+  --kami-link:#000; --kami-link-hover:#d946ef;
+  --kami-bar-bg:rgba(255,255,255,.92); --kami-bar-border:#000;
+  --kami-font-display:'JetBrains Mono', ui-monospace, monospace;
+  --kami-font-body:'JetBrains Mono', ui-monospace, monospace;
+}
+html[data-theme="editorial"]{
+  --kami-text:#16140c; --kami-text-muted:#8a2f1b; --kami-text-subtle:#8a2f1b80;
+  --kami-link:#8a2f1b; --kami-link-hover:#2f2a26;
+  --kami-bar-bg:rgba(243,238,226,.92); --kami-bar-border:rgba(22,20,12,.18);
+  --kami-font-display:Georgia, 'EB Garamond', serif;
+  --kami-font-body:Georgia, 'EB Garamond', serif;
+}
+html[data-theme="terminal"]{
+  --kami-text:#26ff9d; --kami-text-muted:rgba(255,209,102,.7); --kami-text-subtle:rgba(255,209,102,.4);
+  --kami-link:#ffd166; --kami-link-hover:#ffe9a8;
+  --kami-bar-bg:rgba(2,8,6,.85); --kami-bar-border:rgba(38,255,157,.22);
+  --kami-font-display:'JetBrains Mono', ui-monospace, monospace;
+  --kami-font-body:'JetBrains Mono', ui-monospace, monospace;
+}
+html[data-theme="zen"]{
+  --kami-text:#3a3a32; --kami-text-muted:#7a8471; --kami-text-subtle:#7a847180;
+  --kami-link:#7a8471; --kami-link-hover:#334155;
+  --kami-bar-bg:rgba(236,234,216,.92); --kami-bar-border:rgba(58,58,50,.12);
+}
+
+html[data-kami-chrome="off"] .kami-breadcrumb-fixed,
+html[data-kami-chrome="off"] .theme-switcher-container,
+html[data-kami-chrome="off"] .kami-shortcut-hint,
+html[data-kami-chrome="off"] .kami-footer-fixed,
+html[data-kami-chrome="off"] .kami-splash{ display:none !important; }
+
+/* ─────────── BREADCRUMB ─────────── */
+.kami-breadcrumb-fixed{
+  position:fixed;
+  top:.85rem; left:4.6rem;
+  z-index:2147483645;
+  font-family:var(--kami-font-body);
+  font-size:.78rem;
+  letter-spacing:.01em;
+  color:var(--kami-text-muted);
+  display:flex; align-items:center; gap:.32rem;
+  pointer-events:auto;
+}
+.kami-breadcrumb-fixed a{
+  color:var(--kami-text-muted) !important;
+  text-decoration:none !important;
+  opacity:.85;
+  transition:color .15s, opacity .15s;
+}
+.kami-breadcrumb-fixed a:hover{
+  color:var(--kami-text) !important;
+  opacity:1;
+}
+.kami-breadcrumb-fixed .sep{ opacity:.45; user-select:none; }
+.kami-breadcrumb-fixed .current{
+  color:var(--kami-text);
+  font-weight:500;
+  opacity:1;
+}
+@media (max-width:640px){
+  .kami-breadcrumb-fixed{ top:.7rem; left:3rem; font-size:.7rem; }
+}
+
+/* ─────────── THEME SWITCHER ─────────── */
+.theme-switcher-container{
+  position:fixed;
+  top:.6rem; left:.8rem;
+  z-index:2147483646;
+  font-family:var(--kami-font-mono);
+}
+.theme-switcher-pill{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; padding:0;
+  background:var(--kami-bar-bg);
+  color:var(--kami-text);
+  border:1px solid var(--kami-bar-border);
+  border-radius:999px;
+  cursor:pointer;
+  font-size:14px; line-height:1;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  transition:transform .15s ease, border-color .15s;
+}
+.theme-switcher-pill:hover{ border-color:var(--kami-text); transform:scale(1.04); }
+.theme-switcher-pill:focus-visible{ outline:2px solid var(--kami-text); outline-offset:2px; }
+.theme-switcher-pill-icon{ font-family:var(--kami-font-mono); font-size:13px; }
+
+.theme-switcher-picker{
+  position:absolute;
+  top:calc(100% + 6px); left:0;
+  display:none;
+  flex-direction:column;
+  min-width:140px;
+  padding:4px;
+  background:var(--kami-bar-bg);
+  border:1px solid var(--kami-bar-border);
+  border-radius:8px;
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+}
+.theme-switcher-container.open .theme-switcher-picker{ display:flex; }
+.theme-switcher-option{
+  display:flex; align-items:center; gap:8px;
+  padding:6px 10px;
+  background:transparent; color:var(--kami-text);
+  border:0; border-radius:5px;
+  cursor:pointer;
+  font-family:var(--kami-font-mono); font-size:11px;
+  letter-spacing:.02em;
+  text-align:left;
+}
+.theme-switcher-option:hover{ background:rgba(127,127,127,.10); }
+.theme-switcher-option.active{ background:rgba(127,127,127,.15); font-weight:600; }
+.theme-switcher-option-icon{ width:14px; text-align:center; }
+
+/* ─────────── SHORTCUT HINT (top-right) ─────────── */
+.kami-shortcut-hint{
+  position:fixed;
+  top:.85rem; right:.9rem;
+  z-index:2147483644;
+  font-family:var(--kami-font-mono);
+  font-size:.7rem;
+  color:var(--kami-text-muted);
+  pointer-events:none;
+}
+.kami-shortcut-hint kbd{
+  font-family:var(--kami-font-mono);
+  font-size:10px;
+  padding:1px 5px;
+  margin:0 2px;
+  border:1px solid var(--kami-bar-border);
+  border-radius:3px;
+  background:transparent;
+  color:var(--kami-text-muted);
+}
+@media (max-width:640px){
+  .kami-shortcut-hint{ display:none; }
+}
+
+/* ─────────── FOOTER (fixed bottom) ─────────── */
+.kami-footer-fixed{
+  position:fixed;
+  bottom:.6rem; left:50%;
+  transform:translateX(-50%);
+  z-index:2147483643;
+  font-family:var(--kami-font-mono);
+  font-size:.65rem;
+  color:var(--kami-text-subtle);
+  display:flex; align-items:center; gap:.5rem;
+  padding:5px 12px;
+  background:var(--kami-bar-bg);
+  border:1px solid var(--kami-bar-border);
+  border-radius:999px;
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  opacity:.55;
+  transition:opacity .2s ease;
+}
+.kami-footer-fixed:hover{ opacity:1; }
+.kami-footer-fixed a{
+  color:var(--kami-link);
+  text-decoration:none;
+  transition:color .15s;
+}
+.kami-footer-fixed a:hover{ color:var(--kami-link-hover); }
+.kami-footer-fixed .dot{ opacity:.45; user-select:none; }
+@media (max-width:640px){
+  .kami-footer-fixed{ font-size:.6rem; padding:4px 9px; gap:.35rem; bottom:.45rem; }
+}
+
+/* ─────────── SPLASH (one-shot) ─────────── */
+.kami-splash{
+  position:fixed; inset:0;
+  z-index:2147483647;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:18px;
+  background:var(--kami-bg);
+  color:var(--kami-text);
+  font-family:var(--kami-font-body);
+  pointer-events:auto;
+  transition:opacity .45s ease, visibility .45s ease;
+}
+html[data-theme="brutalist"] .kami-splash{ background:#fff; }
+html[data-theme="editorial"] .kami-splash{ background:#f3eee2; }
+html[data-theme="terminal"]  .kami-splash{ background:#020806; color:#26ff9d; }
+html[data-theme="zen"]       .kami-splash{ background:#ecead8; }
+.kami-splash.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+.kami-splash-name{
+  font-family:var(--kami-font-display);
+  font-size:clamp(28px, 5vw, 44px);
+  font-weight:500;
+  letter-spacing:-.02em;
+  line-height:1;
+  margin:0;
+}
+.kami-splash-tag{
+  font-family:var(--kami-font-mono);
+  font-size:11px;
+  opacity:.55;
+  letter-spacing:.04em;
+  text-transform:lowercase;
+  margin:0;
+  text-align:center;
+  max-width:32ch;
+}
+.kami-splash-dot{
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--kami-text);
+  opacity:.5;
+  animation:kami-pulse 1.2s ease-in-out infinite;
+}
+@keyframes kami-pulse{
+  0%, 100%{ transform:scale(1); opacity:.5; }
+  50%{ transform:scale(1.5); opacity:1; }
+}
+.kami-splash-skip{
+  position:absolute;
+  bottom:24px;
+  font-family:var(--kami-font-mono);
+  font-size:10px;
+  opacity:.4;
+  letter-spacing:.05em;
+}
+.kami-splash-skip kbd{
+  font-family:var(--kami-font-mono);
+  font-size:10px;
+  padding:1px 5px;
+  border:1px solid var(--kami-bar-border);
+  border-radius:3px;
+  background:transparent;
+}

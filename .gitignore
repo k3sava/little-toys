@@ -45,3 +45,6 @@ public/string-art/
 public/gravity-type/
 public/particle-life/
 public/aurea/
+
+# Smoke-test artifacts (scripts/test-toys.cjs)
+scripts/__screens__/
