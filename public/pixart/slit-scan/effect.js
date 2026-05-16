@@ -26,7 +26,7 @@
 // One metaphor: cursor IS the slit head — drag to shear.
 'use strict';
 
-const CYCLE_MS = 15000;
+const CYCLE_MS = 20000;
 
 const cv  = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -147,6 +147,7 @@ function buildOutput(){
 }
 
 function paint(){
+  window.WAGUI?.flashValues(params);
   const W = cv.width, H = cv.height;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);

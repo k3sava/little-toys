@@ -23,7 +23,7 @@
 // Interactive: cursor X → gridDensityNumber 20..80 (left = coarse, right =
 // fine), cursor Y → lightnessThreshold 80..230 (top = sparse, bottom = dense
 // coverage). One metaphor: cursor sculpts the mosaic.
-const CYCLE_MS = 15000;
+const CYCLE_MS = 20000;
 
 const cv  = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -210,6 +210,7 @@ function buildCells(){
 
 // ---------- paint ----------
 function paint(){
+  window.WAGUI?.flashValues(params);
   const W = cv.width, H = cv.height;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);

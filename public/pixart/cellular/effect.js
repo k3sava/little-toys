@@ -37,7 +37,7 @@
 // alive, up/down changes the cell grain.
 'use strict';
 
-const CYCLE_MS = 15000;
+const CYCLE_MS = 20000;
 
 const cv  = document.getElementById('cv');
 const ctx = cv.getContext('2d');
@@ -335,6 +335,7 @@ function buildGrid(){
 
 // ---------- paint ----------
 function paint(){
+  window.WAGUI?.flashValues(params);
   const W = cv.width, H = cv.height;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -495,9 +496,31 @@ const BUILD_KEYS = new Set([
 ]);
 const PAINT_KEYS = new Set(['showEffect']);
 
+// Each ruleset family owns its own bounds sliders. Hiding the inactive ones
+// keeps the panel scoped to controls that actually affect output.
+function familyOf(key){
+  if(/^ltl/i.test(key)) return 'LTL';
+  if(/^mnca/i.test(key)) return 'MNCAB';
+  if(/^mncc/i.test(key)) return 'MNCC';
+  if(['surviveLowerBound','surviveUpperBound','birthLowerBound','birthUpperBound'].includes(key)){
+    return 'Classic';
+  }
+  return null;
+}
+function applyFamilyVisibility(){
+  const active = params.neighborhoodType || 'Classic';
+  document.querySelectorAll('.wg-row[data-key]').forEach(row => {
+    const fam = familyOf(row.dataset.key);
+    if(fam === null) return;
+    row.style.display = (fam === active) ? '' : 'none';
+  });
+}
+
 function init(){
   gui = new WAGui(document.getElementById('panel'), params);
+  applyFamilyVisibility();
   gui.on((key) => {
+    if(key === 'neighborhoodType'){ applyFamilyVisibility(); /* fall through to repaint */ }
     if(key === 'animate'){
       if(params.animate) startAnimation();
       else { stopAnimation(); schedule('paint'); }

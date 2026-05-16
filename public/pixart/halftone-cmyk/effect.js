@@ -213,6 +213,7 @@ function buildPlates(){
 }
 
 function paint(){
+  window.WAGUI?.flashValues(params);
   const W = cv.width, H = cv.height;
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -268,7 +269,7 @@ function paint(){
 //
 // Interactive: cursor X → cellSize (4..30), cursor Y → registerOffset (-8..8).
 //
-const CYCLE_MS = 15000;
+const CYCLE_MS = 20000;
 let animationId = null;
 let animationStartTime = 0;
 let mouseX = 0, mouseY = 0, hasMouse = false;
