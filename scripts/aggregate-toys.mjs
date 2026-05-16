@@ -138,6 +138,23 @@ const TOYS = [
       "shared/keys.js", "shared/theme-tokens.css",
     ],
   },
+  {
+    slug: "poster",
+    name: "poster",
+    category: "Generative",
+    keywords: "typography, poster, generative, design, art direction, editorial",
+    description: "Type a phrase, idea, or article. Two art directors compose two completely different posters. 12 directors, 10 template families, 45,408 variants. Every decision is shown. Every decision is editable. Deterministic — same input, same output.",
+    subpaths: [
+      "",
+      "shared/style.css",
+      "shared/chrome.css", "shared/gui.css", "shared/theme.js", "shared/theme-tokens.css",
+      "shared/parse.js", "shared/seed.js", "shared/article.js",
+      "shared/templateParams.js", "shared/layout.js", "shared/mycelium.js",
+      "shared/conceit.js", "shared/archetypes.js",
+      "shared/director.js", "shared/render.js", "shared/app.js",
+      "shared/knowledge/designers.json",
+    ],
+  },
 ];
 
 async function fetchToyHtml(slug) {

@@ -52,6 +52,7 @@ export const groups: ToyGroup[] = [
       { slug: "form", title: "FORM", badge: "typography", description: "Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video.", href: "/form/" },
       { slug: "wordart", title: "wordart", badge: "typography", description: "Type a phrase, pick an effect, export it. Eight canvas effects (line, slice, blur, dither, type, halftone, glitch, mesh) share one chrome with keyboard shortcuts, theme cycling, PNG snapshots, and a 15 s offline MP4 render.", href: "/wordart/" },
       { slug: "pixart", title: "pixart", badge: "image + video", description: "Drop an image or video, pick an effect. 28 canvas effects across 8 categories (type, tonal, halftone, geometric, cinematic, painterly, glitch, generative). 20 s seamless loops, PNG + MP4 export.", href: "/pixart/" },
+      { slug: "poster", title: "poster", badge: "art direction", description: "Type a phrase, idea, or article. Two art directors compose two completely different posters. 12 directors, 10 template families, 45,408 variants. Every decision shown, every decision editable. Deterministic.", href: "/poster/" },
     ],
   },
   {
