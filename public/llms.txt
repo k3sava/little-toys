@@ -2,7 +2,7 @@
 
 > Creative experiments by Kesava. Interactive audio toys, generative visuals, physics simulations, CSS art. All free, all in your browser. Every toy below has its own canonical URL on toys.iamkesava.com; the source code lives in standalone GitHub repos for code-share.
 
-Counts: 14 toys across 5 categories. 12 hosted on toys.iamkesava.com, 2 cross-linked to apps.iamkesava.com.
+Counts: 15 toys across 5 categories. 13 hosted on toys.iamkesava.com, 2 cross-linked to apps.iamkesava.com.
 
 ## Index
 
@@ -42,6 +42,7 @@ Counts: 14 toys across 5 categories. 12 hosted on toys.iamkesava.com, 2 cross-li
 - [FORM](https://toys.iamkesava.com/form/): Type a phrase, the system arranges it like a typographer. Five design philosophies (Swiss, Editorial, Brutalist, Kinetic, Painterly) plus a blend lab. PNG or video. (source: https://github.com/k3sava/form)
 - [wordart](https://toys.iamkesava.com/wordart/): Type a phrase, pick an effect, export it. Eight canvas effects (line, slice, blur, dither, type, halftone, glitch, mesh) share one chrome with keyboard shortcuts, theme cycling, PNG snapshots, and a 15 s offline MP4 render. (source: https://github.com/k3sava/wordart)
 - [pixart](https://toys.iamkesava.com/pixart/): Drop an image or video, pick an effect. 28 canvas effects across 8 categories (type, tonal, halftone, geometric, cinematic, painterly, glitch, generative). 20 s seamless loops, PNG + MP4 export. (source: https://github.com/k3sava/pixart)
+- [poster](https://toys.iamkesava.com/poster/): Type a phrase, idea, or article. Two art directors compose two completely different posters. 12 directors, 10 template families, 45,408 variants. Every decision shown, every decision editable. Deterministic. (source: https://github.com/k3sava/poster)
 
 ### Craft
 

@@ -2,9 +2,9 @@
   "$schema": "https://toys.iamkesava.com/toys.schema.json",
   "site": "https://toys.iamkesava.com",
   "license": "MIT",
-  "last_updated": "2026-05-15",
+  "last_updated": "2026-05-16",
   "counts": {
-    "toys": 14,
+    "toys": 15,
     "categories": 5
   },
   "categories": [
@@ -42,7 +42,8 @@
         "aurea",
         "form",
         "wordart",
-        "pixart"
+        "pixart",
+        "poster"
       ]
     },
     {
@@ -157,6 +158,14 @@
       "external": false,
       "badge": "image + video",
       "description": "Drop an image or video, pick an effect. 28 canvas effects across 8 categories (type, tonal, halftone, geometric, cinematic, painterly, glitch, generative). 20 s seamless loops, PNG + MP4 export."
+    },
+    {
+      "slug": "poster",
+      "title": "poster",
+      "url": "https://toys.iamkesava.com/poster/",
+      "external": false,
+      "badge": "art direction",
+      "description": "Type a phrase, idea, or article. Two art directors compose two completely different posters. 12 directors, 10 template families, 45,408 variants. Every decision shown, every decision editable. Deterministic."
     },
     {
       "slug": "https://apps.iamkesava.com/playground/zen-garden",

@@ -167,6 +167,136 @@ async function fetchToyHtml(slug) {
   throw new Error(`could not fetch index.html for ${slug} from main or master`);
 }
 
+// Inject canonical sister-site chrome into a toy's HTML:
+//   - <link>/<script> tags pointing to /_chrome/* (served from this repo)
+//   - Theme switcher (top-left), breadcrumb (top-left), shortcut hint (top-right)
+//   - Fixed footer (sister sites + made by Kesava + github link) at bottom
+//   - Optional splash overlay (only when toy doesn't already have one)
+//
+// Idempotent: if the HTML already contains kami-breadcrumb or
+// theme-switcher-container, the chrome is assumed to be in place (this is
+// true for wordart/pixart/form/poster which ship their own copies).
+// Toys that capture every key as input — pressing T would both cycle the
+// theme AND type a letter. Disable the T-shortcut for these; users click
+// the theme switcher pill instead.
+const KEY_CAPTURE_TOYS = new Set(["gravity-type"]);
+
+function injectChrome(html, slug, name, description, isSubpage) {
+  // A toy is "already chromed" if it has any of the canonical kami markup
+  // (wordart/pixart/form/poster), OR sonicc's homegrown equivalent (.theme-sw +
+  // .crumb + .kami-footer). In that case we leave it alone — bolting on a
+  // second copy creates the overlap the user explicitly warned about.
+  const hasKamiBreadcrumb = /class=["'][^"']*\bkami-breadcrumb\b/i.test(html);
+  const hasKamiFooter     = /class=["'][^"']*\bkami-footer\b/i.test(html);
+  const hasThemeSwitcher  = /class=["'][^"']*\btheme-switcher-container\b/i.test(html);
+  const hasSoniccTheme    = /class=["'][^"']*\btheme-sw\b/i.test(html);
+  const hasSoniccCrumb    = /class=["'][^"']*\bcrumb\b/i.test(html) && /https:\/\/iamkesava\.com/.test(html);
+  if (hasKamiBreadcrumb || hasKamiFooter || hasThemeSwitcher || (hasSoniccTheme && hasSoniccCrumb)) {
+    // The toy has its own chrome. Rewrite the breadcrumb to point to the
+    // toys hub so the served-from-toys.iamkesava.com path stays canonical.
+    return rewriteOwnBreadcrumb(html, slug, name);
+  }
+
+  // Already has its own splash (plink, synth-pad, kaleidoscopic, etc.) —
+  // skip the kami splash so we don't double-overlay. Tighter regex: must
+  // be a full class/id value, not a prefix of something else like
+  // "splash-essentials". Matches `id="splash"`, `class="splash"`,
+  // `class="splash other"`, `class="other splash"`, etc.
+  const hasOwnSplash =
+    /\bid\s*=\s*["'](?:splash|loading-overlay|loading-screen|intro-overlay)["']/i.test(html) ||
+    /\bclass\s*=\s*["'][^"']*(?:^|\s)(?:splash|loading-overlay|loading-screen|intro-overlay)(?:\s|["'])/i.test(html);
+
+  // Use absolute paths so chrome loads from any subdirectory depth.
+  const rootSlug = slug.split("/")[0];
+  const skipKeyShortcuts = KEY_CAPTURE_TOYS.has(rootSlug);
+  const headInject = `
+    <link rel="stylesheet" href="/_chrome/chrome.css">
+    ${skipKeyShortcuts ? `<script>document.documentElement.setAttribute("data-kami-shortcuts","off");</script>` : ""}
+    <script src="/_chrome/theme.js" defer></script>
+    <script src="/_chrome/splash.js" defer></script>
+  `;
+
+  // Parent breadcrumb crumb: on a subpage like /pixart/blur/, parent is
+  // pixart itself (../). On the root, parent is the toys hub.
+  const parentHref = isSubpage ? "../" : "https://toys.iamkesava.com/";
+  const parentLabel = isSubpage ? slug.split("/")[0] : "toys";
+  const currentLabel = isSubpage ? slug.split("/").slice(1).join(" — ") : name;
+
+  const bodyInject = `
+<div class="theme-switcher-container">
+  <button class="theme-switcher-pill" type="button" aria-label="Cycle theme (T)" title="Cycle theme (T)">
+    <span class="theme-switcher-pill-icon">○</span>
+  </button>
+</div>
+<nav class="kami-breadcrumb-fixed" aria-label="Breadcrumb">
+  <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+  ${isSubpage
+    ? `<a href="https://toys.iamkesava.com/">toys</a><span class="sep">·</span><a href="${parentHref}">${parentLabel}</a><span class="sep">·</span><span class="current">${currentLabel}</span>`
+    : `<a href="${parentHref}">${parentLabel}</a><span class="sep">·</span><span class="current">${currentLabel}</span>`
+  }
+</nav>
+${skipKeyShortcuts ? "" : `<div class="kami-shortcut-hint" aria-hidden="true">
+  <kbd>T</kbd> theme
+</div>`}
+${hasOwnSplash ? "" : `<div class="kami-splash" role="status" aria-live="polite">
+  <h1 class="kami-splash-name">${escapeHtml(name)}</h1>
+  <p class="kami-splash-tag">${escapeHtml(description.slice(0, 90))}</p>
+  <span class="kami-splash-dot"></span>
+  <div class="kami-splash-skip">press <kbd>esc</kbd> or click to begin</div>
+</div>`}
+<footer class="kami-footer-fixed" role="contentinfo">
+  <a href="https://apps.iamkesava.com/">apps</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://tools.iamkesava.com/">tools</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://toys.iamkesava.com/" aria-current="page" style="font-weight:600;color:var(--kami-text);">toys</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://codex.iamkesava.com/">codex</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://iamkesava.com" rel="author">kesava</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://github.com/k3sava/${slug.split("/")[0]}" rel="noopener">github</a>
+</footer>
+`;
+
+  let out = html;
+  // Insert head assets before </head>.
+  if (/<\/head>/i.test(out)) {
+    out = out.replace(/<\/head>/i, `${headInject}\n  </head>`);
+  } else if (/<head[^>]*>/i.test(out)) {
+    out = out.replace(/<head[^>]*>/i, (m) => m + headInject);
+  } else {
+    out = `<!doctype html>\n<html><head>${headInject}</head>\n${out}\n</html>`;
+  }
+  // Insert chrome markup just after <body ...>. If no <body>, prepend.
+  if (/<body[^>]*>/i.test(out)) {
+    out = out.replace(/<body[^>]*>/i, (m) => m + bodyInject);
+  } else {
+    out = out + bodyInject;
+  }
+  return out;
+}
+
+function escapeHtml(s) {
+  return (s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+// When a toy ships its own chrome, ensure the breadcrumb points to the toys
+// hub. If it already does (wordart/pixart family already inject the correct
+// crumb), leave it alone. If it points elsewhere (sonicc → apps), rewrite.
+function rewriteOwnBreadcrumb(html, slug, name) {
+  const re = /(<nav\b[^>]*\bclass\s*=\s*["'][^"']*\b(?:crumb|kami-breadcrumb)\b[^"']*["'][^>]*>)([\s\S]*?)(<\/nav>)/i;
+  const m = html.match(re);
+  if (!m) return html;
+  // Already pointing to toys.iamkesava.com — leave it alone.
+  if (/toys\.iamkesava\.com/.test(m[2])) return html;
+  const inner =
+    `<a href="https://iamkesava.com">home</a><span class="sep">&middot;</span>` +
+    `<a href="https://toys.iamkesava.com/">toys</a><span class="sep">&middot;</span>` +
+    `<span class="current">${escapeHtml(name)}</span>`;
+  return html.replace(re, (_, open, _mid, close) => `${open}${inner}${close}`);
+}
+
 function injectCanonical(html, slug, name, description, keywords) {
   const url = `${SITE}/${slug}/`;
   const ldGraph = {
@@ -294,13 +424,15 @@ async function main() {
             const subSlug = toy.slug + "/" + sub.replace(/\/?index\.html$/, "");
             const pageName = `${toy.name} — ${sub.split("/")[0]}`;
             content = injectCanonical(content, subSlug, pageName, toy.description, toy.keywords);
+            content = injectChrome(content, subSlug, pageName, toy.description, true);
           }
           await writeFile(fullLocal, content);
         } else {
           // Directory — fetched its index.html, write to <sub>/index.html.
           const subSlug = toy.slug + (sub ? "/" + sub : "");
           const pageName = sub === "" ? toy.name : `${toy.name} — ${sub[0].toUpperCase() + sub.slice(1)}`;
-          const enriched = injectCanonical(content, subSlug, pageName, toy.description, toy.keywords);
+          let enriched = injectCanonical(content, subSlug, pageName, toy.description, toy.keywords);
+          enriched = injectChrome(enriched, subSlug, pageName, toy.description, sub !== "");
           await writeFile(fullLocal, enriched);
         }
       } catch (e) {
