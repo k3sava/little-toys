@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>particle life</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f5f7;--ink:#1d1d1f;--mid:rgba(29,29,31,.58);--dim:rgba(29,29,31,.36);
+  --bd:rgba(29,29,31,.11);--font:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;
+  /* ── THEME-AWARE OVERLAY ── */
+  --ov-bg:rgba(245,245,247,.97);
+  --ov-text:#1d1d1f;
+  --ov-dim:rgba(29,29,31,.36);
+  --ov-mid:rgba(29,29,31,.55);
+  --ov-strong:rgba(29,29,31,.75);
+  --ov-border:rgba(29,29,31,.1);
+  --ov-row-bg:rgba(29,29,31,.015);
+  --ov-row-border:rgba(29,29,31,.08);
+  --ov-key-bg:rgba(29,29,31,.06);
+  --ov-key-text:rgba(29,29,31,.5);
+  --ov-grid-bg:rgba(245,245,247,.5);
+  --ov-cta-bg:#1d1d1f;
+  --ov-cta-text:#f5f5f7;
+  --ov-dot:#1d1d1f;
+}
+html[data-theme="brutalist"]{
+  --ov-bg:rgba(255,255,255,.97);
+  --ov-text:#000;
+  --ov-dim:rgba(0,0,0,.4);
+  --ov-mid:rgba(0,0,0,.6);
+  --ov-strong:#000;
+  --ov-border:rgba(0,0,0,.15);
+  --ov-row-bg:rgba(0,0,0,.02);
+  --ov-row-border:rgba(0,0,0,.1);
+  --ov-key-bg:rgba(0,0,0,.08);
+  --ov-key-text:rgba(0,0,0,.55);
+  --ov-grid-bg:rgba(255,255,255,.5);
+  --ov-cta-bg:#000;
+  --ov-cta-text:#fff;
+  --ov-dot:#000;
+}
+html[data-theme="editorial"]{
+  --ov-bg:rgba(250,249,246,.97);
+  --ov-text:#1a1a1a;
+  --ov-dim:rgba(26,26,26,.36);
+  --ov-mid:rgba(26,26,26,.55);
+  --ov-strong:rgba(26,26,26,.75);
+  --ov-border:rgba(26,26,26,.1);
+  --ov-row-bg:rgba(26,26,26,.015);
+  --ov-row-border:rgba(26,26,26,.08);
+  --ov-key-bg:rgba(26,26,26,.06);
+  --ov-key-text:rgba(26,26,26,.5);
+  --ov-grid-bg:rgba(250,249,246,.5);
+  --ov-cta-bg:#1a1a1a;
+  --ov-cta-text:#faf9f6;
+  --ov-dot:#1a1a1a;
+}
+html[data-theme="terminal"]{
+  --ov-bg:rgba(10,10,10,.97);
+  --ov-text:#00ff41;
+  --ov-dim:rgba(0,255,65,.36);
+  --ov-mid:rgba(0,255,65,.55);
+  --ov-strong:rgba(0,255,65,.75);
+  --ov-border:rgba(0,255,65,.15);
+  --ov-row-bg:rgba(0,255,65,.02);
+  --ov-row-border:rgba(0,255,65,.1);
+  --ov-key-bg:rgba(0,255,65,.08);
+  --ov-key-text:rgba(0,255,65,.55);
+  --ov-grid-bg:rgba(10,10,10,.5);
+  --ov-cta-bg:#00ff41;
+  --ov-cta-text:#0a0a0a;
+  --ov-dot:#00ff41;
+}
+html[data-theme="zen"]{
+  --ov-bg:rgba(248,246,243,.97);
+  --ov-text:#2d2926;
+  --ov-dim:rgba(45,41,38,.36);
+  --ov-mid:rgba(45,41,38,.55);
+  --ov-strong:rgba(45,41,38,.75);
+  --ov-border:rgba(45,41,38,.1);
+  --ov-row-bg:rgba(45,41,38,.015);
+  --ov-row-border:rgba(45,41,38,.08);
+  --ov-key-bg:rgba(45,41,38,.06);
+  --ov-key-text:rgba(45,41,38,.5);
+  --ov-grid-bg:rgba(248,246,243,.5);
+  --ov-cta-bg:#2d2926;
+  --ov-cta-text:#f8f6f3;
+  --ov-dot:#2d2926;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a}
+canvas{display:block;cursor:crosshair}
+
+/* ─── PRESET FLASH ──────────────────────────── */
+#preset-flash{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font:200 clamp(1.2rem,4vw,2.4rem)/1 var(--font);letter-spacing:.3em;
+  color:rgba(255,255,255,.7);pointer-events:none;
+  opacity:0;transition:opacity .4s ease;z-index:10;
+}
+#preset-flash.vis{opacity:1}
+
+/* ─── SPLASH OVERLAY ─────────────────────────── */
+.ov{
+  position:fixed;inset:0;z-index:40;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--ov-bg);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  transition:opacity .5s cubic-bezier(.4,0,.2,1);
+  padding:20px;overflow-y:auto;
+}
+.ov.gone{opacity:0;pointer-events:none}
+.spl-inner{max-width:490px;width:100%;display:flex;flex-direction:column;align-items:center}
+.spl-title{
+  font-size:clamp(.92rem,3vw,1.5rem);font-weight:200;
+  letter-spacing:.3em;color:var(--ov-text);margin-bottom:7px;text-align:center;
+}
+.spl-desc{
+  font-size:clamp(.54rem,.82vw,.66rem);font-weight:300;
+  letter-spacing:.1em;color:var(--ov-dim);line-height:2;
+  text-align:center;margin-bottom:24px;max-width:360px;
+}
+
+.sck{display:block;width:100%;margin-bottom:0}
+.sct{display:none;width:100%;margin-bottom:0}
+@media(hover:none) and (pointer:coarse){.sck{display:none}.sct{display:block}}
+
+.sgrid{
+  border:1px solid var(--ov-border);border-radius:10px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;width:100%;background:var(--ov-grid-bg);
+}
+@media(max-width:440px){.sgrid{grid-template-columns:1fr}}
+.srow{
+  display:flex;align-items:center;padding:9px 12px;gap:9px;
+  background:var(--ov-row-bg);border-right:1px solid var(--ov-row-border);border-bottom:1px solid var(--ov-row-border);
+}
+.srow:nth-child(2n){border-right:none}
+.srow:nth-last-child(-n+2){border-bottom:none}
+.srow.cta{background:var(--ov-key-bg);border-bottom:none;grid-column:1/-1}
+.srow.cta .skey{color:var(--ov-strong);border-color:var(--ov-border);background:var(--ov-key-bg);letter-spacing:.06em}
+.cta-phrase{display:flex;align-items:center;gap:7px;flex-wrap:nowrap}
+.cta-word{font-size:.52rem;font-weight:300;letter-spacing:.07em;color:var(--ov-mid);white-space:nowrap}
+.blink-dot{
+  display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--ov-dot);opacity:.4;flex-shrink:0;margin-left:4px;
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.15}50%{opacity:.85}}
+.skey{
+  font-size:.5rem;font-weight:400;letter-spacing:.06em;
+  color:var(--ov-key-text);background:var(--ov-key-bg);
+  border:1px solid var(--ov-border);border-radius:4px;
+  padding:2px 7px;white-space:nowrap;flex-shrink:0;min-width:38px;text-align:center;
+}
+.sdsc{font-size:.52rem;font-weight:300;letter-spacing:.05em;color:var(--ov-dim)}
+@media(max-width:440px){
+  .srow{border-right:none}
+  .srow:nth-last-child(-n+2){border-bottom:1px solid var(--ov-row-border)}
+  .srow:last-child{border-bottom:none}
+  .srow.cta{border-bottom:none}
+}
+
+/* ─── BOTTOM CONTROL BAR ────────────────────── */
+#controlbar{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:30;display:flex;align-items:center;gap:3px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);
+  border-radius:100px;padding:4px 6px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+  overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;
+  max-width:calc(100vw - 32px);
+}
+#controlbar::-webkit-scrollbar{display:none}
+#controlbar.show{opacity:1;pointer-events:auto}
+
+.pb{
+  font:400 .56rem/1 var(--font);letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);background:none;border:none;
+  border-radius:100px;padding:0 14px;min-height:44px;
+  cursor:pointer;white-space:nowrap;position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:color .2s;-webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.pb:hover{color:rgba(255,255,255,.7)}
+.pb.on{color:rgba(255,255,255,.9)}
+.pb.on::after{
+  content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.6);
+}
+.pb .kbk{
+  font-size:.34rem;opacity:.25;font-weight:300;letter-spacing:.04em;
+}
+@media(hover:none) and (pointer:coarse){.pb .kbk{display:none}}
+
+/* species dot */
+.sp-dot{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  margin-right:3px;vertical-align:middle;
+}
+
+/* ─── TOP BAR ───────────────────────────────── */
+#topbar{
+  position:fixed;top:14px;right:14px;z-index:30;
+  display:flex;gap:5px;
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+}
+#topbar.show{opacity:1;pointer-events:auto}
+
+.tb{
+  font:300 13px/1 var(--font);
+  color:rgba(255,255,255,.35);background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.12);border-radius:100px;
+  min-width:36px;height:32px;padding:0 10px;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  cursor:pointer;transition:all .3s;position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.tb:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6)}
+.tb .kbk{
+  font-size:.34rem;opacity:.25;font-weight:300;position:absolute;
+  bottom:3px;right:7px;
+}
+@media(hover:none) and (pointer:coarse){.tb .kbk{display:none}}
+</style>
+<script>
+(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)})();
+</script>
+
+    <link rel="canonical" href="https://toys.iamkesava.com/particle-life/">
+    <meta property="og:url" content="https://toys.iamkesava.com/particle-life/">
+    <meta property="og:title" content="Particle Life, by Kesava">
+    <meta property="og:description" content="Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe.">
+    <meta property="og:image" content="https://toys.iamkesava.com/particle-life/og.svg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Particle Life, by Kesava">
+    <meta name="twitter:description" content="Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe.">
+    <meta name="twitter:image" content="https://toys.iamkesava.com/particle-life/og.svg">
+    <meta name="author" content="Kesava">
+    <meta name="description" content="Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe.">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CreativeWork","@id":"https://toys.iamkesava.com/particle-life/","name":"Particle Life","description":"Colored particles follow simple attraction rules and create complex, organic behavior. Click to create a new universe.","url":"https://toys.iamkesava.com/particle-life/","keywords":"particles, simulation, emergence","author":{"@type":"Person","name":"Kesava","url":"https://iamkesava.com"},"publisher":{"@type":"Organization","name":"little toys","url":"https://toys.iamkesava.com"},"codeRepository":"https://github.com/k3sava/particle-life","license":"https://opensource.org/licenses/MIT"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iamkesava","item":"https://iamkesava.com"},{"@type":"ListItem","position":2,"name":"toys","item":"https://toys.iamkesava.com/"},{"@type":"ListItem","position":3,"name":"Particle Life","item":"https://toys.iamkesava.com/particle-life/"}]}]}</script>
+  
+  
+    <link rel="stylesheet" href="/_chrome/chrome.css">
+    
+    <script src="/_chrome/theme.js" defer></script>
+    <script src="/_chrome/splash.js" defer></script>
+  
+  </head>
+<body>
+<div class="theme-switcher-container">
+  <button class="theme-switcher-pill" type="button" aria-label="Cycle theme (T)" title="Cycle theme (T)">
+    <span class="theme-switcher-pill-icon">○</span>
+  </button>
+</div>
+<nav class="kami-breadcrumb-fixed" aria-label="Breadcrumb">
+  <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+  <a href="https://toys.iamkesava.com/">toys</a><span class="sep">·</span><span class="current">Particle Life</span>
+</nav>
+<div class="kami-shortcut-hint" aria-hidden="true">
+  <kbd>T</kbd> theme
+</div>
+
+<footer class="kami-footer-fixed" role="contentinfo">
+  <a href="https://apps.iamkesava.com/">apps</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://tools.iamkesava.com/">tools</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://toys.iamkesava.com/" aria-current="page" style="font-weight:600;color:var(--kami-text);">toys</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://codex.iamkesava.com/">codex</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://iamkesava.com" rel="author">kesava</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://github.com/k3sava/particle-life" rel="noopener">github</a>
+</footer>
+
+<canvas id="c"></canvas>
+<div id="preset-flash"></div>
+
+<!-- ─── TOP BAR ───────────────────────────────── -->
+<div id="topbar">
+  <button class="tb" id="btn-help">?<span class="kbk">9</span></button>
+  <button class="tb" id="btn-new">&#8634; New<span class="kbk">0</span></button>
+</div>
+
+<!-- ─── BOTTOM CONTROL BAR ────────────────────── -->
+<div id="controlbar">
+  <button class="pb" id="btn-preset">Preset<span class="kbk">P</span></button>
+  <button class="pb" id="btn-species">Species<span class="kbk">1-6</span></button>
+  <button class="pb" id="btn-walls">Walls<span class="kbk">W</span></button>
+  <button class="pb" id="btn-trails">Trails<span class="kbk">T</span></button>
+  <button class="pb" id="btn-blackhole">Black Hole<span class="kbk">B</span></button>
+</div>
+
+<!-- ─── SPLASH ────────────────────────────────── -->
+<div class="ov" id="splash">
+  <div class="spl-inner">
+    <div class="spl-title">particle life</div>
+    <div class="spl-desc">watch tiny worlds emerge from simple rules</div>
+
+    <!-- Desktop shortcuts (essential only) -->
+    <div class="sck sgrid">
+      <div class="srow"><span class="skey">Click</span><span class="sdsc">attract particles</span></div>
+      <div class="srow"><span class="skey">Right-click</span><span class="sdsc">repel particles</span></div>
+      <div class="srow"><span class="skey">Space</span><span class="sdsc">randomize universe</span></div>
+      <div class="srow cta">
+        <span class="skey">Enter</span>
+        <span class="cta-phrase"><span class="cta-word">tap anywhere to begin</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+
+    <!-- Touch shortcuts (essential only) -->
+    <div class="sct sgrid">
+      <div class="srow"><span class="skey">Tap</span><span class="sdsc">attract particles</span></div>
+      <div class="srow"><span class="skey">Long press</span><span class="sdsc">repel particles</span></div>
+      <div class="srow"><span class="skey">2-finger tap</span><span class="sdsc">randomize universe</span></div>
+      <div class="srow cta">
+        <span class="skey">Tap</span>
+        <span class="cta-phrase"><span class="cta-word">tap anywhere to begin</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── HELP OVERLAY ─────────────────────────── -->
+<div class="ov gone" id="help-overlay">
+  <div class="spl-inner">
+    <div class="spl-title">particle life</div>
+    <div class="spl-desc">all shortcuts</div>
+
+    <!-- Desktop shortcuts (full) -->
+    <div class="sck sgrid">
+      <div class="srow"><span class="skey">Click</span><span class="sdsc">place attractor (3s)</span></div>
+      <div class="srow"><span class="skey">Right-click</span><span class="sdsc">place repulsor (3s)</span></div>
+      <div class="srow"><span class="skey">Space</span><span class="sdsc">randomize rules</span></div>
+      <div class="srow"><span class="skey">P</span><span class="sdsc">cycle presets</span></div>
+      <div class="srow"><span class="skey">1 - 6</span><span class="sdsc">select species</span></div>
+      <div class="srow"><span class="skey">+ / &minus;</span><span class="sdsc">add / remove particles</span></div>
+      <div class="srow"><span class="skey">W</span><span class="sdsc">toggle wall bounce</span></div>
+      <div class="srow"><span class="skey">T</span><span class="sdsc">motion trails</span></div>
+      <div class="srow"><span class="skey">C</span><span class="sdsc">connection lines</span></div>
+      <div class="srow"><span class="skey">B</span><span class="sdsc">black hole</span></div>
+      <div class="srow"><span class="skey">F</span><span class="sdsc">freeze selected species</span></div>
+      <div class="srow"><span class="skey">A</span><span class="sdsc">show attraction arrows</span></div>
+      <div class="srow"><span class="skey">0</span><span class="sdsc">new universe</span></div>
+      <div class="srow"><span class="skey">9</span><span class="sdsc">show this screen</span></div>
+      <div class="srow cta">
+        <span class="skey">Esc</span>
+        <span class="cta-phrase"><span class="cta-word">close</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+
+    <!-- Touch shortcuts (full) -->
+    <div class="sct sgrid">
+      <div class="srow"><span class="skey">Tap</span><span class="sdsc">place attractor</span></div>
+      <div class="srow"><span class="skey">Long press</span><span class="sdsc">place repulsor</span></div>
+      <div class="srow"><span class="skey">2-finger tap</span><span class="sdsc">randomize rules</span></div>
+      <div class="srow"><span class="skey">Swipe L/R</span><span class="sdsc">cycle presets</span></div>
+      <div class="srow"><span class="skey">Swipe Up</span><span class="sdsc">toggle trails</span></div>
+      <div class="srow"><span class="skey">Swipe Down</span><span class="sdsc">black hole</span></div>
+      <div class="srow cta">
+        <span class="skey">Tap</span>
+        <span class="cta-phrase"><span class="cta-word">close</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ═══════════════════════════════════════════════
+   SPLASH & HELP
+   ═══════════════════════════════════════════════ */
+const splash=document.getElementById('splash');
+const helpOverlay=document.getElementById('help-overlay');
+const controlbar=document.getElementById('controlbar');
+const topbar=document.getElementById('topbar');
+let splashOpen=true;
+let helpOpen=false;
+
+function showUI(){
+  controlbar.classList.add('show');
+  topbar.classList.add('show');
+}
+function hideUI(){
+  controlbar.classList.remove('show');
+  topbar.classList.remove('show');
+}
+
+function dismissSplash(){
+  if(!splashOpen)return;
+  splashOpen=false;
+  splash.classList.add('gone');
+  showUI();
+}
+function dismissHelp(){
+  if(!helpOpen)return;
+  helpOpen=false;
+  helpOverlay.classList.add('gone');
+}
+function showHelp(){
+  if(helpOpen)return;
+  helpOpen=true;
+  helpOverlay.classList.remove('gone');
+}
+function toggleHelp(){
+  if(helpOpen) dismissHelp(); else showHelp();
+}
+
+splash.addEventListener('click',dismissSplash);
+splash.addEventListener('touchstart',e=>{e.preventDefault();dismissSplash()},{passive:false});
+helpOverlay.addEventListener('click',dismissHelp);
+helpOverlay.addEventListener('touchstart',e=>{e.preventDefault();dismissHelp()},{passive:false});
+
+// Top bar buttons
+document.getElementById('btn-help').addEventListener('click',e=>{e.stopPropagation();toggleHelp()});
+document.getElementById('btn-new').addEventListener('click',e=>{e.stopPropagation();newUniverse()});
+
+/* ═══════════════════════════════════════════════
+   CANVAS & SIZING
+   ═══════════════════════════════════════════════ */
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+const flashEl=document.getElementById('preset-flash');
+
+let W,H;
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  buildGrid();
+  buildGlowSprites();
+  ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+}
+resize();
+window.addEventListener('resize',resize);
+
+/* ═══════════════════════════════════════════════
+   CONSTANTS & STATE
+   ═══════════════════════════════════════════════ */
+const species=[
+  {r:110,g:235,b:220},{r:255,g:120,b:180},{r:160,g:120,b:255},
+  {r:100,g:255,b:140},{r:255,g:200,b:80},{r:80,g:180,b:255}
+];
+const NUM_SPECIES=species.length;
+const MAX_RADIUS=120;
+const FRICTION=0.92;
+const FORCE_SCALE=0.0008;
+const CELL_SIZE=MAX_RADIUS;
+
+let gridCols,gridRows,grid;
+function buildGrid(){
+  gridCols=Math.ceil(W/CELL_SIZE)+1;
+  gridRows=Math.ceil(H/CELL_SIZE)+1;
+  grid=new Array(gridCols*gridRows);
+  for(let i=0;i<grid.length;i++) grid[i]=[];
+}
+function clearGrid(){for(let i=0;i<grid.length;i++) grid[i].length=0}
+function cellIndex(x,y){
+  const col=Math.max(0,Math.min(gridCols-1,(x/CELL_SIZE)|0));
+  const row=Math.max(0,Math.min(gridRows-1,(y/CELL_SIZE)|0));
+  return row*gridCols+col;
+}
+
+/* ─── Typed-array particle storage ─────────── */
+const MAX_PARTICLES=3000;
+const pData=new Float32Array(MAX_PARTICLES*6);
+let pCount=0;
+
+function pX(i){return pData[i*6]}
+function pY(i){return pData[i*6+1]}
+function pVx(i){return pData[i*6+2]}
+function pVy(i){return pData[i*6+3]}
+function pSp(i){return pData[i*6+4]}
+function pFr(i){return pData[i*6+5]}
+function setPX(i,v){pData[i*6]=v}
+function setPY(i,v){pData[i*6+1]=v}
+function setPVx(i,v){pData[i*6+2]=v}
+function setPVy(i,v){pData[i*6+3]=v}
+function setPSp(i,v){pData[i*6+4]=v}
+function setPFr(i,v){pData[i*6+5]=v}
+
+function addParticle(x,y,sp){
+  if(pCount>=MAX_PARTICLES)return;
+  const i=pCount++;
+  setPX(i,x);setPY(i,y);setPVx(i,0);setPVy(i,0);setPSp(i,sp);setPFr(i,0);
+}
+function removeParticles(sp,count){
+  let removed=0;
+  for(let i=pCount-1;i>=0&&removed<count;i--){
+    if(pSp(i)===sp){
+      const last=pCount-1;
+      if(i!==last) for(let k=0;k<6;k++) pData[i*6+k]=pData[last*6+k];
+      pCount--;removed++;
+    }
+  }
+}
+
+/* ─── Rules ────────────────────────────────── */
+let rules=[];
+function randomizeRules(){
+  rules=[];
+  for(let i=0;i<NUM_SPECIES;i++){
+    rules[i]=[];
+    for(let j=0;j<NUM_SPECIES;j++) rules[i][j]=Math.random()*2-1;
+  }
+}
+function setRules(matrix){rules=matrix.map(r=>r.slice())}
+
+/* ─── Presets ──────────────────────────────── */
+const presetNames=['Random','Symbiosis','Predator-Prey','Crystals','Chaos','Orbits'];
+let presetIndex=0;
+function applyPreset(idx){
+  presetIndex=((idx%presetNames.length)+presetNames.length)%presetNames.length;
+  const n=NUM_SPECIES;
+  switch(presetIndex){
+    case 0: randomizeRules(); break;
+    case 1:{ const m=[];for(let i=0;i<n;i++){m[i]=[];for(let j=0;j<n;j++)m[i][j]=-0.3}
+      for(let i=0;i<n;i+=2){const j=(i+1)%n;m[i][j]=0.9;m[j][i]=0.9;m[i][i]=0.2;m[j][j]=0.2}
+      setRules(m);break;}
+    case 2:{ const m=[];for(let i=0;i<n;i++){m[i]=[];for(let j=0;j<n;j++)m[i][j]=-0.2}
+      for(let i=0;i<n;i++){m[i][(i+1)%n]=0.8;m[i][(i+n-1)%n]=-0.6;m[i][i]=0.15}
+      setRules(m);break;}
+    case 3:{ const m=[];for(let i=0;i<n;i++){m[i]=[];for(let j=0;j<n;j++)m[i][j]=0.35+Math.random()*0.15}
+      setRules(m);break;}
+    case 4:{ const m=[];for(let i=0;i<n;i++){m[i]=[];for(let j=0;j<n;j++)m[i][j]=(Math.random()*2-1)*1.5}
+      setRules(m);break;}
+    case 5:{ const m=[];for(let i=0;i<n;i++){m[i]=[];for(let j=0;j<n;j++){
+        const d=(j-i+n)%n;m[i][j]=d===1?0.7:d===n-1?-0.5:d===0?0.1:-0.15;
+      }}
+      setRules(m);break;}
+  }
+  flashPresetName(presetNames[presetIndex]);
+  updateButtons();
+}
+let flashTimer=0;
+function flashPresetName(name){
+  flashEl.textContent=name.toLowerCase();
+  flashEl.classList.add('vis');
+  clearTimeout(flashTimer);
+  flashTimer=setTimeout(()=>flashEl.classList.remove('vis'),1400);
+}
+
+function createParticles(count){
+  pCount=0;
+  for(let i=0;i<count;i++) addParticle(Math.random()*W,Math.random()*H,(Math.random()*NUM_SPECIES)|0);
+}
+function newUniverse(){
+  randomizeRules();createParticles(1000);buildGrid();
+  presetIndex=0;
+  flashPresetName('random');
+  updateButtons();
+}
+
+/* ─── Feature toggles ─────────────────────── */
+let selectedSpecies=0;
+let wallsMode=false;
+let trailsMode=false;
+let showArrows=false;
+let showConnections=false; // OFF by default for performance
+
+/* ─── God mode: attractors/repulsors ───────── */
+const godPoints=[];
+function addGodPoint(x,y,strength){godPoints.push({x,y,strength,birth:performance.now(),life:3000})}
+
+let blackHoleActive=false;
+let blackHolePhase=0;
+let blackHoleStart=0;
+const BH_SUCK_DUR=1500;
+const BH_EXPLODE_DUR=800;
+
+/* ─── Glow sprites ─────────────────────────── */
+const glowCanvases=[];
+const GLOW_SIZE=16;
+const glowCanvasesHL=[];
+function buildGlowSprites(){
+  glowCanvases.length=0;glowCanvasesHL.length=0;
+  for(let s=0;s<NUM_SPECIES;s++){
+    const sz=GLOW_SIZE*2;
+    const off=document.createElement('canvas');off.width=sz;off.height=sz;
+    const oc=off.getContext('2d');
+    const c=species[s];
+    const g=oc.createRadialGradient(GLOW_SIZE,GLOW_SIZE,0,GLOW_SIZE,GLOW_SIZE,GLOW_SIZE);
+    g.addColorStop(0,`rgba(${c.r},${c.g},${c.b},1)`);
+    g.addColorStop(0.15,`rgba(${c.r},${c.g},${c.b},.85)`);
+    g.addColorStop(0.4,`rgba(${c.r},${c.g},${c.b},.3)`);
+    g.addColorStop(0.7,`rgba(${c.r},${c.g},${c.b},.08)`);
+    g.addColorStop(1,`rgba(${c.r},${c.g},${c.b},0)`);
+    oc.fillStyle=g;oc.fillRect(0,0,sz,sz);
+    glowCanvases.push(off);
+    const hl=document.createElement('canvas');hl.width=sz+8;hl.height=sz+8;
+    const hc=hl.getContext('2d');
+    hc.drawImage(off,4,4);
+    hc.strokeStyle=`rgba(${c.r},${c.g},${c.b},.5)`;
+    hc.lineWidth=1.5;
+    hc.beginPath();hc.arc(GLOW_SIZE+4,GLOW_SIZE+4,GLOW_SIZE+2,0,Math.PI*2);hc.stroke();
+    glowCanvasesHL.push(hl);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   BUTTON STATE
+   ═══════════════════════════════════════════════ */
+const btnPreset=document.getElementById('btn-preset');
+const btnSpecies=document.getElementById('btn-species');
+const btnWalls=document.getElementById('btn-walls');
+const btnTrails=document.getElementById('btn-trails');
+const btnBlackhole=document.getElementById('btn-blackhole');
+
+function updateButtons(){
+  // Preset button — show current name
+  btnPreset.innerHTML=presetNames[presetIndex]+'<span class="kbk">P</span>';
+
+  // Species button — colored dot + number
+  const c=species[selectedSpecies];
+  btnSpecies.innerHTML='<span><span class="sp-dot" style="background:rgb('+c.r+','+c.g+','+c.b+')"></span>'+
+    (selectedSpecies+1)+'</span><span class="kbk">1-6</span>';
+
+  // Walls toggle
+  btnWalls.className='pb'+(wallsMode?' on':'');
+  // Trails toggle
+  btnTrails.className='pb'+(trailsMode?' on':'');
+}
+
+// Button click handlers
+btnPreset.addEventListener('click',e=>{e.stopPropagation();applyPreset(presetIndex+1)});
+btnSpecies.addEventListener('click',e=>{
+  e.stopPropagation();
+  selectedSpecies=(selectedSpecies+1)%NUM_SPECIES;
+  updateButtons();
+});
+btnWalls.addEventListener('click',e=>{
+  e.stopPropagation();
+  wallsMode=!wallsMode;
+  updateButtons();
+});
+btnTrails.addEventListener('click',e=>{
+  e.stopPropagation();
+  trailsMode=!trailsMode;
+  updateButtons();
+});
+btnBlackhole.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(!blackHoleActive){
+    blackHoleActive=true;blackHolePhase=0;blackHoleStart=performance.now();
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   PHYSICS UPDATE
+   ═══════════════════════════════════════════════ */
+function update(){
+  clearGrid();
+  for(let i=0;i<pCount;i++) grid[cellIndex(pX(i),pY(i))].push(i);
+
+  const now=performance.now();
+  const friction=presetIndex===4?0.96:FRICTION;
+
+  // Black hole
+  let bhX=W/2,bhY=H/2,bhPull=0,bhPush=0;
+  if(blackHoleActive){
+    const elapsed=now-blackHoleStart;
+    if(blackHolePhase===0){
+      bhPull=Math.min(1,elapsed/BH_SUCK_DUR)*0.06;
+      if(elapsed>BH_SUCK_DUR){blackHolePhase=1;blackHoleStart=now}
+    } else {
+      bhPush=(1-elapsed/BH_EXPLODE_DUR)*0.12;
+      if(elapsed>BH_EXPLODE_DUR) blackHoleActive=false;
+    }
+  }
+
+  for(let i=0;i<pCount;i++){
+    if(pFr(i)===1) continue;
+    let fx=0,fy=0;
+    const ax=pX(i),ay=pY(i),as=pSp(i);
+    const col=(ax/CELL_SIZE)|0,row=(ay/CELL_SIZE)|0;
+    const rulesRow=rules[as];
+
+    for(let dr=-1;dr<=1;dr++){
+      for(let dc=-1;dc<=1;dc++){
+        const nc=col+dc,nr=row+dr;
+        if(nc<0||nc>=gridCols||nr<0||nr>=gridRows) continue;
+        const cell=grid[nr*gridCols+nc];
+        for(let k=0;k<cell.length;k++){
+          const j=cell[k];
+          if(j===i) continue;
+          const dx=pX(j)-ax,dy=pY(j)-ay;
+          const dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<1||dist>MAX_RADIUS) continue;
+          const rule=rulesRow[pSp(j)];
+          let force;
+          const halfR=MAX_RADIUS*0.5;
+          if(dist<halfR*0.4){
+            force=(dist/(halfR*0.4)-1)*1.5;
+          } else {
+            const t=(dist-halfR*0.4)/(MAX_RADIUS-halfR*0.4);
+            force=rule*(1-Math.abs(2*t-1));
+          }
+          const f=force*FORCE_SCALE/dist;
+          fx+=dx*f;fy+=dy*f;
+        }
+      }
+    }
+
+    // God mode points
+    for(let g=godPoints.length-1;g>=0;g--){
+      const gp=godPoints[g];
+      const age=now-gp.birth;
+      if(age>gp.life){godPoints.splice(g,1);continue}
+      const fade=1-age/gp.life;
+      const dx=gp.x-ax,dy=gp.y-ay;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>1&&dist<300){
+        const str=gp.strength*fade*(1-dist/300)*FORCE_SCALE*30;
+        fx+=(dx/dist)*str;fy+=(dy/dist)*str;
+      }
+    }
+
+    // Black hole
+    if(blackHoleActive){
+      const dx=bhX-ax,dy=bhY-ay;
+      const dist=Math.sqrt(dx*dx+dy*dy)+1;
+      if(blackHolePhase===0){
+        fx+=(dx/dist)*bhPull;fy+=(dy/dist)*bhPull;
+      } else {
+        fx-=(dx/dist)*bhPush;fy-=(dy/dist)*bhPush;
+      }
+    }
+
+    setPVx(i,(pVx(i)+fx)*friction);
+    setPVy(i,(pVy(i)+fy)*friction);
+  }
+
+  // Move
+  for(let i=0;i<pCount;i++){
+    if(pFr(i)===1) continue;
+    let nx=pX(i)+pVx(i),ny=pY(i)+pVy(i);
+    if(wallsMode){
+      if(nx<0){nx=0;setPVx(i,-pVx(i)*0.5)}
+      else if(nx>=W){nx=W-1;setPVx(i,-pVx(i)*0.5)}
+      if(ny<0){ny=0;setPVy(i,-pVy(i)*0.5)}
+      else if(ny>=H){ny=H-1;setPVy(i,-pVy(i)*0.5)}
+    } else {
+      if(nx<0)nx+=W;else if(nx>=W)nx-=W;
+      if(ny<0)ny+=H;else if(ny>=H)ny-=H;
+    }
+    setPX(i,nx);setPY(i,ny);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   DRAWING
+   ═══════════════════════════════════════════════ */
+function draw(){
+  if(trailsMode){
+    ctx.fillStyle='rgba(10,10,10,0.06)';
+  } else {
+    ctx.fillStyle='rgba(10,10,10,0.25)';
+  }
+  ctx.fillRect(0,0,W,H);
+
+  const now=performance.now();
+
+  // Connection lines — BATCHED per species for performance
+  if(showConnections){
+    for(let s=0;s<NUM_SPECIES;s++){
+      const c=species[s];
+      ctx.strokeStyle=`rgba(${c.r},${c.g},${c.b},0.04)`;
+      ctx.lineWidth=0.4;
+      ctx.beginPath();
+      for(let i=0;i<pCount;i++){
+        if(pSp(i)!==s) continue;
+        const ax=pX(i),ay=pY(i);
+        const col=(ax/CELL_SIZE)|0,row=(ay/CELL_SIZE)|0;
+        for(let dr=-1;dr<=1;dr++){
+          for(let dc=-1;dc<=1;dc++){
+            const nc=col+dc,nr=row+dr;
+            if(nc<0||nc>=gridCols||nr<0||nr>=gridRows) continue;
+            const cell=grid[nr*gridCols+nc];
+            for(let k=0;k<cell.length;k++){
+              const j=cell[k];
+              if(j<=i) continue;
+              if(pSp(j)!==s) continue;
+              const dx=pX(j)-ax,dy=pY(j)-ay;
+              const dist=Math.sqrt(dx*dx+dy*dy);
+              if(dist>60) continue;
+              ctx.moveTo(ax,ay);
+              ctx.lineTo(pX(j),pY(j));
+            }
+          }
+        }
+      }
+      ctx.stroke();
+    }
+  }
+
+  // Attraction arrows
+  if(showArrows){
+    ctx.lineWidth=0.5;
+    for(let i=0;i<pCount;i+=4){
+      const ax=pX(i),ay=pY(i),as=pSp(i);
+      let bestDx=0,bestDy=0,bestStr=-Infinity;
+      const col=(ax/CELL_SIZE)|0,row=(ay/CELL_SIZE)|0;
+      for(let dr=-1;dr<=1;dr++){
+        for(let dc=-1;dc<=1;dc++){
+          const nc=col+dc,nr=row+dr;
+          if(nc<0||nc>=gridCols||nr<0||nr>=gridRows) continue;
+          const cell=grid[nr*gridCols+nc];
+          for(let k=0;k<cell.length;k++){
+            const j=cell[k];if(j===i)continue;
+            const r=rules[as][pSp(j)];
+            if(r>bestStr){bestStr=r;bestDx=pX(j)-ax;bestDy=pY(j)-ay}
+          }
+        }
+      }
+      if(bestStr>0.1){
+        const d=Math.sqrt(bestDx*bestDx+bestDy*bestDy)+1;
+        const len=Math.min(25,d);
+        ctx.strokeStyle=`rgba(255,255,255,${bestStr*0.12})`;
+        ctx.beginPath();ctx.moveTo(ax,ay);
+        ctx.lineTo(ax+bestDx/d*len,ay+bestDy/d*len);ctx.stroke();
+      }
+    }
+  }
+
+  // Particles
+  for(let i=0;i<pCount;i++){
+    const sp=pSp(i);
+    const isSelected=sp===selectedSpecies;
+    const sprite=isSelected?glowCanvasesHL[sp]:glowCanvases[sp];
+    const off=isSelected?GLOW_SIZE+4:GLOW_SIZE;
+    ctx.drawImage(sprite,pX(i)-off,pY(i)-off);
+  }
+
+  // God points glow
+  for(let g=0;g<godPoints.length;g++){
+    const gp=godPoints[g];
+    const age=now-gp.birth;
+    const fade=Math.max(0,1-age/gp.life);
+    const r=40*fade;
+    const grad=ctx.createRadialGradient(gp.x,gp.y,0,gp.x,gp.y,r);
+    if(gp.strength>0){
+      grad.addColorStop(0,`rgba(255,255,255,${0.3*fade})`);
+      grad.addColorStop(1,'rgba(255,255,255,0)');
+    } else {
+      grad.addColorStop(0,`rgba(255,80,80,${0.3*fade})`);
+      grad.addColorStop(1,'rgba(255,80,80,0)');
+    }
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.arc(gp.x,gp.y,r,0,Math.PI*2);ctx.fill();
+  }
+
+  // Black hole glow
+  if(blackHoleActive){
+    const elapsed=now-blackHoleStart;
+    const bx=W/2,by=H/2;
+    if(blackHolePhase===0){
+      const p=Math.min(1,elapsed/BH_SUCK_DUR);
+      const r=150*(1-p*0.5);
+      const grad=ctx.createRadialGradient(bx,by,0,bx,by,r);
+      grad.addColorStop(0,`rgba(120,60,255,${0.4*p})`);
+      grad.addColorStop(0.5,`rgba(60,0,120,${0.15*p})`);
+      grad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=grad;ctx.beginPath();ctx.arc(bx,by,r,0,Math.PI*2);ctx.fill();
+    } else {
+      const p=Math.min(1,elapsed/BH_EXPLODE_DUR);
+      const r=300*p;
+      const grad=ctx.createRadialGradient(bx,by,0,bx,by,r);
+      grad.addColorStop(0,`rgba(255,200,100,${0.5*(1-p)})`);
+      grad.addColorStop(0.4,`rgba(255,120,60,${0.2*(1-p)})`);
+      grad.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=grad;ctx.beginPath();ctx.arc(bx,by,r,0,Math.PI*2);ctx.fill();
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   LOOP
+   ═══════════════════════════════════════════════ */
+function loop(){
+  update();draw();requestAnimationFrame(loop);
+}
+
+/* ═══════════════════════════════════════════════
+   INPUT
+   ═══════════════════════════════════════════════ */
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(helpOpen){dismissHelp();return}
+    if(splashOpen){dismissSplash();return}
+    return;
+  }
+  if(splashOpen){
+    dismissSplash();
+    if(e.key==='Enter')return;
+  }
+  if(helpOpen){
+    dismissHelp();
+    return;
+  }
+  const key=e.key.toLowerCase();
+  if(key>='1'&&key<='6'){selectedSpecies=parseInt(key)-1;updateButtons();return}
+  if(key==='9'){toggleHelp();return}
+  if(key==='0'){newUniverse();return}
+  if(key===' '||key==='spacebar'){e.preventDefault();applyPreset(0);return}
+  if(key==='p'){applyPreset(presetIndex+1);return}
+  if(key==='='||key==='+'){
+    for(let i=0;i<50;i++) addParticle(Math.random()*W,Math.random()*H,selectedSpecies);
+    return;
+  }
+  if(key==='-'||key==='_'){removeParticles(selectedSpecies,50);return}
+  if(key==='f'){
+    let anyFrozen=false;
+    for(let i=0;i<pCount;i++) if(pSp(i)===selectedSpecies&&pFr(i)===1){anyFrozen=true;break}
+    for(let i=0;i<pCount;i++) if(pSp(i)===selectedSpecies) setPFr(i,anyFrozen?0:1);
+    return;
+  }
+  if(key==='a'){showArrows=!showArrows;return}
+  if(key==='c'){showConnections=!showConnections;return}
+  if(key==='w'){wallsMode=!wallsMode;updateButtons();return}
+  if(key==='t'){trailsMode=!trailsMode;updateButtons();return}
+  if(key==='b'){
+    if(!blackHoleActive){blackHoleActive=true;blackHolePhase=0;blackHoleStart=performance.now()}
+    return;
+  }
+});
+
+// Mouse: left click = attractor, right click = repulsor
+canvas.addEventListener('click',e=>{
+  if(splashOpen) return;
+  addGodPoint(e.clientX,e.clientY,1);
+});
+canvas.addEventListener('contextmenu',e=>{
+  e.preventDefault();
+  if(splashOpen) return;
+  addGodPoint(e.clientX,e.clientY,-1);
+});
+
+// Touch: tap = attractor, long press = repulsor
+let touchTimer=0,touchStartPos={x:0,y:0},touchMoved=false;
+let swipeStartX=0,swipeStartY=0;
+canvas.addEventListener('touchstart',e=>{
+  if(splashOpen){dismissSplash();e.preventDefault();return}
+  e.preventDefault();
+  const t=e.touches[0];
+  touchStartPos={x:t.clientX,y:t.clientY};
+  swipeStartX=t.clientX;swipeStartY=t.clientY;
+  touchMoved=false;
+  if(e.touches.length===2){
+    applyPreset(0);return;
+  }
+  touchTimer=setTimeout(()=>{
+    if(!touchMoved) addGodPoint(touchStartPos.x,touchStartPos.y,-1);
+    touchTimer=0;
+  },500);
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const t=e.touches[0];
+  if(Math.abs(t.clientX-touchStartPos.x)>15||Math.abs(t.clientY-touchStartPos.y)>15) touchMoved=true;
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(touchTimer){
+    clearTimeout(touchTimer);touchTimer=0;
+    if(!touchMoved) addGodPoint(touchStartPos.x,touchStartPos.y,1);
+  }
+  if(touchMoved&&e.changedTouches.length){
+    const t=e.changedTouches[0];
+    const dx=t.clientX-swipeStartX,dy=t.clientY-swipeStartY;
+    const adx=Math.abs(dx),ady=Math.abs(dy);
+    if(adx>60&&adx>ady){
+      applyPreset(dx>0?presetIndex+1:presetIndex-1+presetNames.length);
+    } else if(ady>60&&ady>adx){
+      if(dy<0){trailsMode=!trailsMode;updateButtons()}
+      else if(!blackHoleActive){blackHoleActive=true;blackHolePhase=0;blackHoleStart=performance.now()}
+    }
+  }
+},{passive:false});
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+buildGlowSprites();
+newUniverse();
+updateButtons();
+ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+loop();
+
+})();
+</script>
+</body>
+</html>

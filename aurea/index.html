@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Aurea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&family=Noto+Serif+JP:wght@300;400&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --serif-display:'Cormorant Garamond',Georgia,serif;
+  --serif-body:'Source Serif 4',Georgia,serif;
+  --zen-display:'Noto Serif JP','Hiragino Mincho ProN',serif;
+  --bg:#111; --surface:rgba(255,255,255,0.85); --surface-solid:#fff;
+  --border:#e5e7eb; --border-strong:#e5e7eb;
+  --text:#1d1d1f; --text-muted:#4b5563; --text-dim:#6b7280;
+  --accent:#2563eb; --accent-soft:rgba(37,99,235,0.08);
+  --card-radius:16px; --card-border:1px solid #e5e7eb; --card-shadow:0 1px 2px rgba(0,0,0,0.03);
+  --font-ui:var(--sans); --font-label:var(--mono);
+  --heading-case:none; --heading-tracking:-0.01em; --heading-weight:600;
+  --motion-fast:150ms; --motion-base:220ms; --motion-ease:cubic-bezier(0.2,0,0,1);
+  --canvas-bg:#111; --canvas-lum:68;
+  --btn-shadow:none; --btn-hover-shadow:0 4px 12px rgba(0,0,0,0.12); --btn-hover-transform:translateY(-1px);
+}
+</style>
+<style id="themeCSS"></style>
+<style>
+html,body{width:100%;height:100%;background:var(--canvas-bg);color:var(--text);font-family:var(--font-ui);overflow:hidden}
+#art{position:absolute;inset:0;width:100%;height:100%;display:block}
+#ui{position:absolute;inset:0;pointer-events:none;z-index:20}
+
+.ui-panel{opacity:1;pointer-events:auto;transition:opacity 0.6s var(--motion-ease),transform 0.6s var(--motion-ease)}
+.ui-panel.hidden{opacity:0;pointer-events:none}
+#controlPanel.hidden{transform:translateX(6px)}#controlPanel{transform:translateX(0)}
+#explainer.hidden{transform:translateY(6px)}#explainer{transform:translateY(0)}
+#toolbar.hidden{transform:translateY(-4px)}#toolbar{transform:translateY(0)}
+
+.panel{background:var(--surface-solid);border:var(--card-border);border-radius:var(--card-radius);box-shadow:var(--card-shadow);transition:background var(--motion-base) var(--motion-ease),border-color var(--motion-base) var(--motion-ease)}
+
+/* ── TOOLBAR ── */
+#toolbar{position:absolute;top:12px;right:14px;display:flex;align-items:center;gap:5px;pointer-events:auto}
+
+.pill{
+  height:32px;padding:0 12px;border-radius:var(--card-radius);
+  border:var(--card-border);background:var(--surface-solid);
+  cursor:pointer;font-family:var(--font-label);font-size:0.65rem;
+  color:var(--text-muted);letter-spacing:0.03em;
+  display:inline-flex;align-items:center;gap:5px;
+  transition:all var(--motion-fast) var(--motion-ease);
+  white-space:nowrap;box-shadow:var(--btn-shadow);
+}
+.pill:hover{border-color:var(--accent);color:var(--text);box-shadow:var(--btn-hover-shadow);transform:var(--btn-hover-transform)}
+.pill.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pill.danger{border-color:rgba(239,68,68,0.3);color:#ef4444;background:rgba(239,68,68,0.06)}
+.pill.danger:hover{border-color:#ef4444}
+.pill.rec-active{border-color:#ef4444!important;color:#ef4444!important;animation:rp 1s ease-in-out infinite}
+@keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,0.25)}50%{box-shadow:0 0 0 4px rgba(239,68,68,0)}}
+.pill .dur-size{opacity:0.5;font-size:0.55rem}
+.dur-pill{display:none}
+.dur-pill.show{display:inline-flex}
+
+.dot{width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0}
+.dot.pulse{animation:dp 1.4s ease-in-out infinite}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.2;transform:scale(0.5)}}
+
+#recProgress{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ef4444,#f97316);width:0%;transition:width 0.15s linear;z-index:100;display:none}
+
+/* ── COMBINED CONTROL PANEL — right side ── */
+#controlPanel{
+  position:absolute;top:52px;right:14px;width:315px;
+  max-height:calc(100vh - 70px);overflow-y:auto;scrollbar-width:none;
+  padding:16px 18px;pointer-events:auto;
+}
+#controlPanel::-webkit-scrollbar{display:none}
+
+.panel-label{font-family:var(--font-label);font-size:0.6rem;letter-spacing:0.1em;color:var(--text-dim);text-transform:var(--heading-case);margin-bottom:10px;font-weight:500}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.form-btn{
+  background:transparent;border:1px solid transparent;border-radius:var(--card-radius);
+  padding:10px 10px;cursor:pointer;text-align:left;
+  transition:all var(--motion-fast) var(--motion-ease);
+  color:var(--text-muted);display:flex;flex-direction:column;gap:2px;
+}
+.form-btn:hover{background:var(--surface);border-color:var(--border);color:var(--text)}
+.form-btn.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.fname{font-family:var(--font-label);font-size:0.65rem;letter-spacing:var(--heading-tracking);font-weight:500;text-transform:var(--heading-case)}
+.ftag{font-family:var(--font-ui);font-style:italic;font-size:0.6rem;opacity:0.5;line-height:1.2}
+
+.srow{margin-bottom:12px}.srow:last-child{margin-bottom:0}
+.shead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.sname{font-family:var(--font-label);font-size:0.6rem;color:var(--text-muted);letter-spacing:0.03em;font-weight:500}
+.sval{font-family:var(--font-label);font-size:0.65rem;color:var(--accent);font-weight:500}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--border-strong);border-radius:2px;outline:none;cursor:pointer;transition:background var(--motion-fast)}
+input[type=range]:hover{background:var(--accent)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid var(--accent);cursor:grab;transition:transform 0.12s}
+input[type=range]:active::-webkit-slider-thumb{cursor:grabbing;transform:scale(1.15)}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--text);border:2px solid var(--accent)}
+.fib-row{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.fchip{font-family:var(--font-label);font-size:0.55rem;padding:2px 5px;border-radius:3px;border:1px solid var(--border);color:var(--text-dim);transition:all var(--motion-fast);font-weight:500}
+.fchip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.divider{height:1px;background:var(--border-strong);margin:14px 0}
+
+/* ── EXPLAINER — tall card, bottom-left ── */
+#explainer{
+  position:absolute;bottom:14px;left:14px;
+  width:min(560px, calc(55vw - 28px));
+  max-height:calc(100vh - 80px);
+  overflow-y:auto;scrollbar-width:none;
+  padding:18px 22px;pointer-events:auto;
+}
+#explainer::-webkit-scrollbar{display:none}
+.ex-form-name{font-family:var(--font-label);font-size:0.7rem;color:var(--accent);text-transform:var(--heading-case);letter-spacing:var(--heading-tracking);font-weight:500;margin-bottom:8px}
+.ex-body{font-size:0.75rem;line-height:1.75;color:var(--text-muted)}
+.ex-body strong{color:var(--text);font-weight:500}
+.ex-body .n{color:var(--accent);font-family:var(--font-label);font-size:0.65rem;font-weight:500}
+.ex-section{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.ex-section-label{font-family:var(--font-label);font-size:0.55rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px;font-weight:500}
+
+/* ── FORMULA CORNER ── */
+#formulaCorner{position:absolute;bottom:14px;right:16px;font-family:var(--font-label);font-size:0.5rem;color:var(--text-dim);opacity:0.35;line-height:2;pointer-events:none;text-align:right}
+#formulaCorner .fv{color:var(--accent);opacity:0.7}
+#formulaCorner .fc{color:var(--text-muted);opacity:0.7}
+
+/* ── ANIMATIONS ── */
+#controlPanel,#explainer{animation:panelIn 0.5s var(--motion-ease)}
+#controlPanel{animation-delay:0.08s}#explainer{animation-delay:0.14s}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px) scale(0.98)}to{opacity:1;transform:none}}
+
+/* ── MOBILE ── */
+@media(max-width:700px){
+  #controlPanel,#explainer,#formulaCorner{display:none!important}
+  #toolbar{top:8px;right:8px}
+  #mobileTrigger{display:flex!important}
+}
+#mobileTrigger{display:none;position:absolute;bottom:18px;left:50%;transform:translateX(-50%);pointer-events:auto;z-index:40}
+#mobileSheet{position:absolute;bottom:0;left:0;right:0;display:none;flex-direction:column;background:var(--surface-solid);border-top:var(--card-border);border-radius:var(--card-radius) var(--card-radius) 0 0;padding:0 0 env(safe-area-inset-bottom,16px);pointer-events:auto;max-height:55vh;z-index:35;overflow:hidden}
+#mobileSheet.open{display:flex}
+.sheet-handle{width:32px;height:3px;border-radius:2px;background:var(--border-strong);margin:10px auto 14px;flex-shrink:0}
+.sheet-inner{overflow-y:auto;padding:0 16px 20px;flex:1;scrollbar-width:none}
+.sheet-inner::-webkit-scrollbar{display:none}
+.m-form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:14px}
+</style>
+
+    <link rel="canonical" href="https://toys.iamkesava.com/aurea/">
+    <meta property="og:url" content="https://toys.iamkesava.com/aurea/">
+    <meta property="og:title" content="Aurea, by Kesava">
+    <meta property="og:description" content="Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.">
+    <meta property="og:image" content="https://toys.iamkesava.com/aurea/og.svg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aurea, by Kesava">
+    <meta name="twitter:description" content="Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.">
+    <meta name="twitter:image" content="https://toys.iamkesava.com/aurea/og.svg">
+    <meta name="author" content="Kesava">
+    <meta name="description" content="Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CreativeWork","@id":"https://toys.iamkesava.com/aurea/","name":"Aurea","description":"Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Thousands of lines from pure equations, biology from math.","url":"https://toys.iamkesava.com/aurea/","keywords":"math art, fibonacci, parametric","author":{"@type":"Person","name":"Kesava","url":"https://iamkesava.com"},"publisher":{"@type":"Organization","name":"little toys","url":"https://toys.iamkesava.com"},"codeRepository":"https://github.com/k3sava/aurea","license":"https://opensource.org/licenses/MIT"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iamkesava","item":"https://iamkesava.com"},{"@type":"ListItem","position":2,"name":"toys","item":"https://toys.iamkesava.com/"},{"@type":"ListItem","position":3,"name":"Aurea","item":"https://toys.iamkesava.com/aurea/"}]}]}</script>
+  
+  
+    <link rel="stylesheet" href="/_chrome/chrome.css">
+    
+    <script src="/_chrome/theme.js" defer></script>
+    <script src="/_chrome/splash.js" defer></script>
+  
+  </head>
+<body>
+<div class="theme-switcher-container">
+  <button class="theme-switcher-pill" type="button" aria-label="Cycle theme (T)" title="Cycle theme (T)">
+    <span class="theme-switcher-pill-icon">○</span>
+  </button>
+</div>
+<nav class="kami-breadcrumb-fixed" aria-label="Breadcrumb">
+  <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+  <a href="https://toys.iamkesava.com/">toys</a><span class="sep">·</span><span class="current">Aurea</span>
+</nav>
+<div class="kami-shortcut-hint" aria-hidden="true">
+  <kbd>T</kbd> theme
+</div>
+<div class="kami-splash" role="status" aria-live="polite">
+  <h1 class="kami-splash-name">Aurea</h1>
+  <p class="kami-splash-tag">Fibonacci-driven parametric line art. 6 original forms, 4K rendering, video recording. Tho</p>
+  <span class="kami-splash-dot"></span>
+  <div class="kami-splash-skip">press <kbd>esc</kbd> or click to begin</div>
+</div>
+<footer class="kami-footer-fixed" role="contentinfo">
+  <a href="https://apps.iamkesava.com/">apps</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://tools.iamkesava.com/">tools</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://toys.iamkesava.com/" aria-current="page" style="font-weight:600;color:var(--kami-text);">toys</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://codex.iamkesava.com/">codex</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://iamkesava.com" rel="author">kesava</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://github.com/k3sava/aurea" rel="noopener">github</a>
+</footer>
+
+<div id="recProgress"></div>
+<canvas id="art"></canvas>
+<div id="ui">
+  <div id="toolbar" class="ui-panel">
+    <button class="pill active" id="btnPlay"><span class="dot pulse" id="liveDot"></span><span id="playLabel">pause</span></button>
+    <button class="pill" id="btnSaveImg">PNG</button>
+    <button class="pill danger" id="btnRec">REC</button>
+    <button class="pill dur-pill" data-dur="15">15s <span class="dur-size">(~25MB)</span></button>
+    <button class="pill dur-pill" data-dur="30">30s <span class="dur-size">(~50MB)</span></button>
+    <button class="pill dur-pill" data-dur="60">60s <span class="dur-size">(~100MB)</span></button>
+  </div>
+
+  <div id="controlPanel" class="panel ui-panel">
+    <div class="panel-label">Form</div>
+    <div class="form-grid" id="formList"></div>
+    <div class="divider"></div>
+    <div class="panel-label">Parameters</div>
+    <div id="sliders"></div>
+    <div class="divider"></div>
+    <div class="panel-label">Fibonacci</div>
+    <div class="fib-row" id="fibRow"></div>
+  </div>
+
+  <div id="explainer" class="panel ui-panel">
+    <div class="ex-form-name" id="exName"></div>
+    <div class="ex-body" id="exBody"></div>
+    <div class="ex-section" id="exDynamic">
+      <div class="ex-section-label">What you're changing</div>
+      <div class="ex-body" id="exDynText"></div>
+    </div>
+    <div class="ex-section">
+      <div class="ex-section-label">Why it looks alive</div>
+      <div class="ex-body" id="exWhy"></div>
+    </div>
+  </div>
+
+  <div id="formulaCorner" class="ui-panel"></div>
+  <button class="pill ui-panel" id="mobileTrigger">controls</button>
+
+  <div id="mobileSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-inner">
+      <div class="m-form-grid" id="mFormGrid"></div>
+      <div class="divider"></div>
+      <div id="mSliders"></div>
+      <div class="divider"></div>
+      <div id="mExplainerMobile"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── THEME ENGINE ──
+var THEMES={
+  'default':{
+    bg:'#141414',surface:'rgba(255,255,255,0.85)',solid:'#fff',border:'#e5e7eb',borderStrong:'#e5e7eb',
+    text:'#1d1d1f',muted:'#4b5563',dim:'#6b7280',accent:'#2563eb',accentSoft:'rgba(37,99,235,0.08)',
+    radius:'16px',cardBorder:'1px solid #e5e7eb',shadow:'0 1px 2px rgba(0,0,0,0.03)',
+    fontUI:"'DM Sans',system-ui,sans-serif",fontLabel:"'JetBrains Mono',monospace",
+    hCase:'none',hTrack:'-0.01em',hWeight:'600',
+    motionFast:'150ms',motionBase:'220ms',motionEase:'cubic-bezier(0.2,0,0,1)',
+    canvasBg:'#141414',canvasBgLight:'#f0f0f0',canvasLum:68,canvasLumLight:32,
+    btnShadow:'none',btnHoverShadow:'0 4px 12px rgba(0,0,0,0.12)',btnHoverTx:'translateY(-1px)'
+  },
+  'brutalist':{
+    bg:'#000000',surface:'#fff',solid:'#fff',border:'#000',borderStrong:'#000',
+    text:'#000',muted:'#000',dim:'#666',accent:'#d946ef',accentSoft:'rgba(217,70,239,0.08)',
+    radius:'0',cardBorder:'2px solid #000',shadow:'4px 4px 0 #000',
+    fontUI:"'JetBrains Mono',monospace",fontLabel:"'JetBrains Mono',monospace",
+    hCase:'uppercase',hTrack:'0.08em',hWeight:'700',
+    motionFast:'40ms',motionBase:'60ms',motionEase:'steps(1)',
+    canvasBg:'#000000',canvasBgLight:'#ffffff',canvasLum:68,canvasLumLight:28,
+    btnShadow:'3px 3px 0 #000',btnHoverShadow:'5px 5px 0 #000',btnHoverTx:'translate(-2px,-2px)'
+  },
+  'editorial':{
+    bg:'#1e1810',surface:'rgba(253,249,240,0.92)',solid:'#fdf9f0',border:'rgba(47,42,38,0.15)',borderStrong:'rgba(47,42,38,0.2)',
+    text:'#2f2a26',muted:'#5a4a38',dim:'#7a6a58',accent:'#8a2f1b',accentSoft:'rgba(138,47,27,0.06)',
+    radius:'4px',cardBorder:'1px solid rgba(47,42,38,0.18)',shadow:'none',
+    fontUI:"'Source Serif 4',Georgia,serif",fontLabel:"'Cormorant Garamond',Georgia,serif",
+    hCase:'none',hTrack:'-0.015em',hWeight:'500',
+    motionFast:'220ms',motionBase:'400ms',motionEase:'cubic-bezier(0.25,0.1,0.25,1)',
+    canvasBg:'#1e1810',canvasBgLight:'#f8f3ea',canvasLum:58,canvasLumLight:30,
+    btnShadow:'none',btnHoverShadow:'none',btnHoverTx:'none'
+  },
+  'terminal':{
+    bg:'#0a1628',surface:'rgba(138,247,167,0.06)',solid:'#111d30',border:'rgba(138,247,167,0.3)',borderStrong:'rgba(138,247,167,0.35)',
+    text:'#8af7a7',muted:'rgba(138,247,167,0.72)',dim:'rgba(138,247,167,0.45)',accent:'#ffd166',accentSoft:'rgba(255,209,102,0.1)',
+    radius:'0',cardBorder:'1px solid rgba(138,247,167,0.3)',shadow:'none',
+    fontUI:"'JetBrains Mono',monospace",fontLabel:"'JetBrains Mono',monospace",
+    hCase:'uppercase',hTrack:'0.04em',hWeight:'500',
+    motionFast:'16ms',motionBase:'16ms',motionEase:'linear',
+    canvasBg:'#0a1628',canvasBgLight:'#d8eae0',canvasLum:55,canvasLumLight:30,
+    btnShadow:'none',btnHoverShadow:'0 0 0 1px #ffd166',btnHoverTx:'none'
+  },
+  'zen':{
+    bg:'#0e1519',surface:'rgba(148,163,184,0.08)',solid:'rgba(30,40,50,0.85)',border:'rgba(148,163,184,0.12)',borderStrong:'rgba(148,163,184,0.15)',
+    text:'#94a3b8',muted:'#64748b',dim:'#475569',accent:'#7a8471',accentSoft:'rgba(122,132,113,0.08)',
+    radius:'20px',cardBorder:'1px solid rgba(148,163,184,0.1)',shadow:'none',
+    fontUI:"'DM Sans',system-ui,sans-serif",fontLabel:"'Noto Serif JP','Hiragino Mincho ProN',serif",
+    hCase:'none',hTrack:'0.04em',hWeight:'300',
+    motionFast:'400ms',motionBase:'600ms',motionEase:'cubic-bezier(0.22,1,0.36,1)',
+    canvasBg:'#0e1519',canvasBgLight:'#f7f9fb',canvasLum:55,canvasLumLight:30,
+    btnShadow:'none',btnHoverShadow:'none',btnHoverTx:'translateY(-2px)'
+  }
+};
+
+function applyTheme(id){
+  var t=THEMES[id]||THEMES['default'];
+  document.getElementById('themeCSS').textContent=':root{'+
+    '--bg:'+t.bg+';--surface:'+t.surface+';--surface-solid:'+t.solid+';'+
+    '--border:'+t.border+';--border-strong:'+t.borderStrong+';'+
+    '--text:'+t.text+';--text-muted:'+t.muted+';--text-dim:'+t.dim+';'+
+    '--accent:'+t.accent+';--accent-soft:'+t.accentSoft+';'+
+    '--card-radius:'+t.radius+';--card-border:'+t.cardBorder+';--card-shadow:'+t.shadow+';'+
+    '--font-ui:'+t.fontUI+';--font-label:'+t.fontLabel+';'+
+    '--heading-case:'+t.hCase+';--heading-tracking:'+t.hTrack+';--heading-weight:'+t.hWeight+';'+
+    '--motion-fast:'+t.motionFast+';--motion-base:'+t.motionBase+';--motion-ease:'+t.motionEase+';'+
+    '--canvas-bg:'+t.canvasBg+';--canvas-lum:'+t.canvasLum+';'+
+    '--btn-shadow:'+t.btnShadow+';--btn-hover-shadow:'+t.btnHoverShadow+';--btn-hover-transform:'+t.btnHoverTx+';'+
+  '}';
+}
+
+var currentTheme='';
+var canvasLightMode=false;
+function syncTheme(){
+  try{var t=localStorage.getItem('theme')||'default';if(t!==currentTheme){currentTheme=t;applyTheme(t)}}catch(e){}
+}
+syncTheme();
+setInterval(syncTheme,500);
+
+// ── DATA ──
+var FIB=[1,1,2,3,5,8,13,21,34,55,89,144,233,377,610];
+var PHI=(1+Math.sqrt(5))/2;
+var DEF={N:300,FA:1,FB:1,Tw:25,Dp:100,Hue:38,Al:87,Sp:5};
+
+var FORMS=[
+  {name:'pulsar',tag:'radiating beats',
+   about:'Two concentric orbits with radii that pulse at different Fibonacci frequencies. The inner and outer rings breathe independently, and their phase offset creates interference patterns.',
+   formula:function(u,p,fa,fb,tw,dp,ph){
+     var f=FIB[fa],g=FIB[fb];
+     var r1=0.4+dp*0.5*Math.pow(Math.sin(f*p*tw),2);
+     var r2=0.2+dp*0.3*Math.pow(Math.cos(g*p*tw),2);
+     return[r1*Math.cos(p+0.4*Math.sin(f*p+ph)),r1*Math.sin(p+0.4*Math.sin(f*p+ph)),
+            r2*Math.cos(p+PHI+0.4*Math.cos(g*p+ph)),r2*Math.sin(p+PHI+0.4*Math.cos(g*p+ph))];
+   },
+   eq:['r\u2081=0.4+d\u00B7sin\u00B2(F(A)\u00B72\u03C0u\u00B7tw)','r\u2082=0.2+d\u00B7cos\u00B2(F(B)\u00B72\u03C0u\u00B7tw)','\u03B8\u2081=2\u03C0u+0.4\u00B7sin(F(A)\u00B72\u03C0u+t)','\u03B8\u2082=2\u03C0u+\u03C6+0.4\u00B7cos(F(B)\u00B72\u03C0u+t)']},
+  {name:'tendril',tag:'growing vines',
+   about:'Lines grow outward from the center with power-law scaling. The first Fibonacci index controls the primary spiral direction; the second modulates the envelope, creating vine-like branching.',
+   formula:function(u,p,fa,fb,tw,dp,ph){
+     var f=FIB[fa],g=FIB[fb],s=Math.pow(u,1.2);
+     return[s*Math.cos(f*p*tw+ph)*(0.5+dp*0.4*Math.sin(g*p)),
+            s*Math.sin(f*p*tw+ph)*(0.5+dp*0.4*Math.cos(g*p)),
+            s*0.5*Math.cos(g*p*tw+ph+1),
+            s*0.5*Math.sin(g*p*tw+ph+1)*(1+dp*0.3*Math.cos(f*p))];
+   },
+   eq:['x\u2081=u\u1D5D\u00B7cos(F(A)\u00B72\u03C0u\u00B7tw+t)\u00B7(0.5+d\u00B7sin(F(B)\u00B72\u03C0u))','y\u2081=u\u1D5D\u00B7sin(...)\u00B7(0.5+d\u00B7cos(F(B)\u00B72\u03C0u))','x\u2082=\u00BDu\u1D5D\u00B7cos(F(B)\u00B72\u03C0u\u00B7tw+t+1)','y\u2082=\u00BDu\u1D5D\u00B7sin(...)\u00B7(1+d\u00B7cos(F(A)\u00B72\u03C0u))']},
+  {name:'vortex',tag:'nested spirals',
+   about:'Two spirals that grow linearly from the center, each rotating at a different Fibonacci frequency. When the frequencies are close to a golden ratio, the spirals lock into stable interference.',
+   formula:function(u,p,fa,fb,tw,dp,ph){
+     var r1=0.1+0.8*u,r2=0.1+0.6*u+dp*0.2*Math.sin(FIB[5]*p);
+     return[r1*Math.cos(FIB[fa]*p*tw+ph),r1*Math.sin(FIB[fa]*p*tw+ph),
+            r2*Math.cos(FIB[fb]*p*tw+ph),r2*Math.sin(FIB[fb]*p*tw+ph)];
+   },
+   eq:['\u03B8\u2081=F(A)\u00B72\u03C0u\u00B7tw+t , r\u2081=0.1+0.8u','\u03B8\u2082=F(B)\u00B72\u03C0u\u00B7tw+t','r\u2082=0.1+0.6u+d\u00B7sin(8\u00B72\u03C0u)']},
+  {name:'membrane',tag:'breathing surface',
+   about:'A horizontal line where each point oscillates vertically at two Fibonacci frequencies. The result looks like a vibrating string or membrane cross-section. Depth controls amplitude.',
+   formula:function(u,p,fa,fb,tw,dp,ph){
+     var f=FIB[fa],g=FIB[fb],x=1.4*(u-0.5);
+     return[x,dp*(0.35*Math.sin(f*Math.PI*u*tw+ph)+0.2*Math.sin(g*Math.PI*u*tw+ph*PHI)),
+            x,dp*(0.2*Math.sin(g*Math.PI*u*tw+ph*0.7)+0.12*Math.cos(FIB[Math.min(fa+2,13)]*Math.PI*u))];
+   },
+   eq:['x=1.4\u00B7(u\u22120.5)','y\u2081=d\u00B7[0.35\u00B7sin(F(A)\u00B7\u03C0u\u00B7tw+t)+0.2\u00B7sin(F(B)\u00B7\u03C0u\u00B7tw+\u03C6t)]','y\u2082=d\u00B7[0.2\u00B7sin(F(B)\u00B7\u03C0u\u00B7tw+0.7t)+0.12\u00B7cos(F(A+2)\u00B7\u03C0u)]']},
+  {name:'lattice',tag:'woven threads',
+   about:'Two sets of sine-cosine curves woven together at right angles, like threads on a loom. The Fibonacci indices control how tightly each direction winds. Cross-modulation creates moire patterns.',
+   formula:function(u,p,fa,fb,tw,dp,ph){
+     var f=FIB[fa],g=FIB[fb];
+     return[Math.sin(f*p*tw+ph)*(0.6+dp*0.3*Math.cos(g*p)),
+            Math.cos(g*p*tw+ph)*(0.6+dp*0.3*Math.sin(f*p)),
+            0.5*Math.sin(g*p*tw+ph+PHI),
+            0.5*Math.cos(f*p*tw+ph+1)];
+   },
+   eq:['x\u2081=sin(F(A)\u00B72\u03C0u\u00B7tw+t)\u00B7(0.6+d\u00B7cos(F(B)\u00B72\u03C0u))','y\u2081=cos(F(B)\u00B72\u03C0u\u00B7tw+t)\u00B7(0.6+d\u00B7sin(F(A)\u00B72\u03C0u))','x\u2082=\u00BD\u00B7sin(F(B)\u00B72\u03C0u\u00B7tw+t+\u03C6)','y\u2082=\u00BD\u00B7cos(F(A)\u00B72\u03C0u\u00B7tw+t+1)']},
+  {name:'corona',tag:'solar flares',
+   about:'A radial base shape with spike envelopes on top, like plasma ejections from a star. The first index shapes the base corona; the second controls how the spikes erupt and recede over time.',
+   formula:function(u,p,fa,fb,tw,dp,ph){
+     var f=FIB[fa],g=FIB[Math.min(fb,13)];
+     var base=0.55+dp*0.35*Math.pow(Math.cos(f*p*tw*0.5),4);
+     var spike=dp*0.4*Math.pow(Math.sin(g*p*tw+ph),2);
+     var r1=base+spike,r2=(base-0.1)*(0.5+dp*0.4*Math.abs(Math.sin(f*p*0.5+ph)));
+     var a=p+0.15*Math.sin(g*p+ph);
+     return[r1*Math.cos(a),r1*Math.sin(a),r2*Math.cos(a+0.03),r2*Math.sin(a+0.03)];
+   },
+   eq:['base=0.55+d\u00B7cos\u2074(F(A)\u00B7\u03C0u\u00B7tw)','spike=d\u00B7sin\u00B2(F(B)\u00B72\u03C0u\u00B7tw+t)','r\u2081=base+spike','r\u2082=(base\u22120.1)\u00B7|sin(F(A)\u00B7\u03C0u+t)|']}
+];
+
+// ── CANVAS ──
+var cv=document.getElementById('art');
+var ctx=cv.getContext('2d',{alpha:false});
+var DPR=Math.min(Math.max(window.devicePixelRatio||2,2),4);
+function resize(){var W=window.innerWidth,H=window.innerHeight;cv.width=W*DPR;cv.height=H*DPR;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0)}
+
+var currentForm=0,tick=0,raf=null,playing=true;
+var recMR=null,recChunks=[],recStartTime=-1,recDur=30;
+var sheetOpen=false;
+
+var SLIDERS=[
+  {id:'sN',label:'segments',min:100,max:5000,step:50,def:DEF.N,fmt:function(v){return Math.round(v).toLocaleString()}},
+  {id:'sFA',label:'F-index A',min:0,max:13,step:1,def:DEF.FA,fmt:function(v){return v+' ('+FIB[v]+')'}},
+  {id:'sFB',label:'F-index B',min:0,max:13,step:1,def:DEF.FB,fmt:function(v){return v+' ('+FIB[v]+')'}},
+  {id:'sTw',label:'twist',min:10,max:300,step:1,def:DEF.Tw,fmt:function(v){return(v/100).toFixed(2)}},
+  {id:'sDp',label:'depth',min:1,max:100,step:1,def:DEF.Dp,fmt:function(v){return(v/100).toFixed(2)}},
+  {id:'sHue',label:'hue',min:0,max:360,step:1,def:DEF.Hue,fmt:function(v){return v+'\u00B0'}},
+  {id:'sAl',label:'alpha',min:5,max:95,step:1,def:DEF.Al,fmt:function(v){return(v/100).toFixed(2)}},
+  {id:'sSp',label:'speed',min:1,max:40,step:1,def:DEF.Sp,fmt:function(v){return(v/10).toFixed(1)+'\u00D7'}}
+];
+
+function gv(id){var el=document.getElementById(id)||document.getElementById('m_'+id);return el?+el.value:0}
+function makeSlidersHTML(pfx){pfx=pfx||'';return SLIDERS.map(function(s){return '<div class="srow"><div class="shead"><span class="sname">'+s.label+'</span><span class="sval" id="'+pfx+'v_'+s.id+'">'+s.fmt(s.def)+'</span></div><input type="range" id="'+pfx+s.id+'" min="'+s.min+'" max="'+s.max+'" step="'+s.step+'" value="'+s.def+'"></div>'}).join('')}
+
+function buildFormList(cid,cls){cls=cls||'';document.getElementById(cid).innerHTML=FORMS.map(function(f,i){return '<button class="form-btn '+cls+(i===0?' active':'')+'" data-form="'+i+'"><span class="fname">'+f.name+'</span><span class="ftag">'+f.tag+'</span></button>'}).join('')}
+
+buildFormList('formList');
+document.getElementById('sliders').innerHTML=makeSlidersHTML('');
+buildFormList('mFormGrid','mobile ');
+document.getElementById('mSliders').innerHTML=makeSlidersHTML('m_');
+
+// ── DYNAMIC EXPLAINER ──
+function updateExplainer(){
+  var f=FORMS[currentForm];
+  var fa=gv('sFA'),fb=gv('sFB');
+  var N=gv('sN'),tw=gv('sTw'),dp=gv('sDp');
+  var ratio=FIB[fb]>0?FIB[fa]/FIB[fb]:0;
+  var ratioStr=ratio.toFixed(3);
+  var phiDist=Math.abs(ratio-PHI);
+
+  document.getElementById('exName').textContent=f.name+' \u2014 '+f.tag;
+  document.getElementById('exBody').innerHTML=f.about;
+
+  var dyn='';
+  dyn+='<strong>'+N+' lines</strong>, each endpoint placed by F(<span class="n">'+fa+'</span>)=<span class="n">'+FIB[fa]+'</span> and F(<span class="n">'+fb+'</span>)=<span class="n">'+FIB[fb]+'</span>. ';
+  dyn+='The ratio F(A)/F(B) = <span class="n">'+ratioStr+'</span>';
+  if(phiDist<0.05) dyn+=' \u2014 almost exactly \u03C6. The waves are phase-locked; the shape is stable and organic.';
+  else if(phiDist<0.2) dyn+=' \u2014 close to \u03C6. Partial locking creates structured asymmetry.';
+  else if(ratio===1) dyn+=' \u2014 both indices match. The form is symmetric and circular.';
+  else dyn+=' \u2014 far from \u03C6. The two frequencies fight, creating turbulent interference.';
+  dyn+=' Twist at <span class="n">'+(tw/100).toFixed(2)+'</span> controls angular density.';
+  dyn+=' Depth at <span class="n">'+(dp/100).toFixed(2)+'</span> scales the amplitude'+(dp<30?' (subtle, almost flat).':dp>80?' (full range, maximum structure).':'.') ;
+  document.getElementById('exDynText').innerHTML=dyn;
+
+  document.getElementById('exWhy').innerHTML='Sunflower seeds pack in <span class="n">34</span> and <span class="n">55</span> spirals. Nautilus shells grow by \u03C6 per quarter-turn. Nature uses Fibonacci because it is the most efficient packing. When you set F-index A and B to consecutive Fibonacci positions (like 7 and 8, giving 13 and 21), the ratio converges to \u03C6=1.618 and biological forms appear. You are not drawing them. You are finding them.';
+
+  var mob=document.getElementById('mExplainerMobile');
+  if(mob) mob.innerHTML='<div class="ex-form-name">'+f.name+'</div><div class="ex-body" style="margin-bottom:8px">'+f.about+'</div><div class="ex-body">'+dyn+'</div>';
+}
+
+// ── BIND ──
+function bindSliders(){
+  SLIDERS.forEach(function(s){
+    ['','m_'].forEach(function(pfx){
+      var el=document.getElementById(pfx+s.id);if(!el)return;
+      el.addEventListener('input',function(){
+        var v=+el.value,other=pfx===''?'m_':'';
+        var el2=document.getElementById(other+s.id);if(el2)el2.value=v;
+        ['','m_'].forEach(function(p2){var ve=document.getElementById(p2+'v_'+s.id);if(ve)ve.textContent=s.fmt(v)});
+        updateFib();updateFormula();updateExplainer();
+      });
+    });
+  });
+}
+bindSliders();
+
+function bindForms(){
+  document.querySelectorAll('.form-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.form-btn').forEach(function(b){b.classList.remove('active')});
+      document.querySelectorAll('.form-btn[data-form="'+btn.dataset.form+'"]').forEach(function(b){b.classList.add('active')});
+      currentForm=+btn.dataset.form;
+      updateFib();updateFormula();updateExplainer();
+    });
+  });
+}
+bindForms();
+
+function updateFib(){
+  var fa=gv('sFA'),fb=gv('sFB'),on=new Set([fa,fb]);
+  document.getElementById('fibRow').innerHTML=FIB.slice(0,14).map(function(v,i){return '<span class="fchip'+(on.has(i)?' on':'')+'">'+v+'</span>'}).join('');
+}
+function updateFormula(){
+  var fa=gv('sFA'),fb=gv('sFB');
+  document.getElementById('formulaCorner').innerHTML=FORMS[currentForm].eq.map(function(l){
+    return l.replace(/F\(A\)/g,'<span class="fv">F('+fa+')='+FIB[fa]+'</span>').replace(/F\(B\)/g,'<span class="fv">F('+fb+')='+FIB[fb]+'</span>').replace(/\u03C6/g,'<span class="fc">\u03C6</span>');
+  }).join('<br>');
+}
+updateFib();updateFormula();updateExplainer();
+
+// ── DRAW ──
+function drawFrame(tk,tCtx,W,H,oScale){
+  var t=THEMES[currentTheme]||THEMES['default'];
+  var N=gv('sN'),fa=gv('sFA'),fb=gv('sFB');
+  var tw=gv('sTw')/100,dp=gv('sDp')/100;
+  var hue0=gv('sHue'),alB=gv('sAl')/100;
+  var spd=gv('sSp')/10;
+  var cx=W/2,cy=H/2,sc=oScale||Math.min(W,H)*0.42;
+  var ph=tk*0.006*spd,fDef=FORMS[currentForm];
+  var bgColor=canvasLightMode?t.canvasBgLight:t.canvasBg;
+  var lum=canvasLightMode?t.canvasLumLight:t.canvasLum;
+  tCtx.fillStyle=bgColor;tCtx.fillRect(0,0,W,H);
+  for(var i=1;i<=N;i++){
+    var u=i/N,p2=2*Math.PI*u;
+    var c=fDef.formula(u,p2,fa,fb,tw,dp,ph);
+    var hue=(u*320+hue0+tk*0.25)%360;
+    var al=Math.max(0.03,alB+0.25*Math.sin(FIB[4]*Math.PI*u));
+    tCtx.strokeStyle='hsla('+hue.toFixed(1)+',62%,'+lum+'%,'+al.toFixed(3)+')';
+    tCtx.lineWidth=0.75;tCtx.beginPath();
+    tCtx.moveTo(cx+c[0]*sc,cy+c[1]*sc);tCtx.lineTo(cx+c[2]*sc,cy+c[3]*sc);tCtx.stroke();
+  }
+}
+function draw(tk){drawFrame(tk,ctx,window.innerWidth,window.innerHeight)}
+
+function loop(){
+  tick++;draw(tick);
+  if(recStartTime>0){var el=(performance.now()-recStartTime)/1000;document.getElementById('recProgress').style.width=Math.min(100,el/recDur*100)+'%';if(el>=recDur)stopRec()}
+  if(playing)raf=requestAnimationFrame(loop);
+}
+function startLoop(){if(!raf&&playing)raf=requestAnimationFrame(loop)}
+function stopLoop(){if(raf){cancelAnimationFrame(raf);raf=null}}
+
+document.getElementById('btnPlay').onclick=function(){
+  playing=!playing;this.classList.toggle('active',playing);
+  document.getElementById('playLabel').textContent=playing?'pause':'play';
+  document.getElementById('liveDot').classList.toggle('pulse',playing);
+  playing?startLoop():stopLoop();
+};
+
+document.getElementById('btnSaveImg').onclick=function(){
+  var W=3840,H=Math.round(3840*(window.innerHeight/window.innerWidth));
+  var oc=document.createElement('canvas');oc.width=W;oc.height=H;
+  var oc2=oc.getContext('2d',{alpha:false});
+  drawFrame(tick,oc2,W,H,Math.min(W,H)*0.42);
+  var a=document.createElement('a');a.download='aurea-'+FORMS[currentForm].name+'-4k-'+Date.now()+'.png';
+  a.href=oc.toDataURL('image/png');a.click();
+};
+
+// ── REC ──
+var recBtn=document.getElementById('btnRec');
+var durPills=document.querySelectorAll('.dur-pill');
+
+recBtn.onclick=function(){
+  if(recMR){stopRec();return}
+  var visible=durPills[0].classList.contains('show');
+  durPills.forEach(function(p){p.classList.toggle('show',!visible)});
+};
+
+durPills.forEach(function(pill){
+  pill.onclick=function(){
+    recDur=+pill.dataset.dur;
+    durPills.forEach(function(p){p.classList.remove('show')});
+    startRec();
+  };
+});
+
+function startRec(){
+  recChunks=[];var stream=cv.captureStream(30);
+  var opts={mimeType:'video/webm;codecs=vp9',videoBitsPerSecond:16000000};
+  try{recMR=new MediaRecorder(stream,opts)}catch(e){recMR=new MediaRecorder(stream)}
+  recMR.ondataavailable=function(e){if(e.data.size>0)recChunks.push(e.data)};
+  recMR.onstop=function(){
+    var blob=new Blob(recChunks,{type:'video/webm'});var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download='aurea-'+FORMS[currentForm].name+'-'+recDur+'s-'+Date.now()+'.webm';a.click();
+    recMR=null;recStartTime=-1;
+    document.getElementById('recProgress').style.width='0%';document.getElementById('recProgress').style.display='none';
+    recBtn.classList.remove('rec-active');recBtn.textContent='REC';
+  };
+  recMR.start(100);recStartTime=performance.now();
+  document.getElementById('recProgress').style.display='block';document.getElementById('recProgress').style.width='0%';
+  recBtn.classList.add('rec-active');recBtn.textContent='STOP';
+  if(!playing){playing=true;startLoop()}
+}
+function stopRec(){if(recMR&&recMR.state!=='inactive')recMR.stop()}
+
+// ── PER-PANEL FADE ──
+var CONTROLS=['#toolbar','#controlPanel','#formulaCorner','#mobileTrigger'];
+var EXPLAINER_SEL='#explainer';
+var ALL_PANELS=CONTROLS.concat([EXPLAINER_SEL]);
+var SHOW_AFTER_MOVE=3000;var EXPLAIN_EXTRA=2000;
+var panelTimers=new Map();
+function panelEl(sel){return document.querySelector(sel)}
+function showPanel(sel){var el=panelEl(sel);if(!el)return;el.classList.remove('hidden');clearTimeout(panelTimers.get(sel))}
+function hidePanel(sel,delay){var el=panelEl(sel);if(!el)return;clearTimeout(panelTimers.get(sel));panelTimers.set(sel,setTimeout(function(){if(!sheetOpen)el.classList.add('hidden')},delay))}
+function showAll(){ALL_PANELS.forEach(showPanel)}
+function scheduleHideAll(){CONTROLS.forEach(function(s){hidePanel(s,0)});hidePanel(EXPLAINER_SEL,EXPLAIN_EXTRA)}
+
+ALL_PANELS.forEach(function(sel){
+  var el=panelEl(sel);if(!el)return;
+  el.addEventListener('mouseenter',function(){showPanel(sel);clearTimeout(panelTimers.get(sel))},{passive:true});
+  el.addEventListener('mouseleave',function(){hidePanel(sel,sel===EXPLAINER_SEL?EXPLAIN_EXTRA:0)},{passive:true});
+});
+
+var globalMoveTimer=null;
+['mousemove','touchmove','touchstart'].forEach(function(ev){
+  document.addEventListener(ev,function(){showAll();clearTimeout(globalMoveTimer);globalMoveTimer=setTimeout(scheduleHideAll,SHOW_AFTER_MOVE)},{passive:true});
+});
+document.addEventListener('mousedown',function(){showAll();clearTimeout(globalMoveTimer);globalMoveTimer=setTimeout(scheduleHideAll,SHOW_AFTER_MOVE)},{passive:true});
+
+document.getElementById('mobileTrigger').onclick=function(){
+  sheetOpen=!sheetOpen;document.getElementById('mobileSheet').classList.toggle('open',sheetOpen);
+  this.textContent=sheetOpen?'close':'controls';if(sheetOpen)showAll();
+};
+
+resize();window.addEventListener('resize',resize);
+draw(0);playing=true;startLoop();
+showAll();setTimeout(scheduleHideAll,SHOW_AFTER_MOVE);
+
+// ── PARENT COMMUNICATION (iframe mode) ──
+var inIframe=window.self!==window.top;
+if(inIframe){
+  document.getElementById('toolbar').style.display='none';
+  function sendState(){
+    window.parent.postMessage({type:'aurea:state',playing:playing,recording:!!recMR},'*');
+  }
+  sendState();
+  window.addEventListener('message',function(e){
+    var d=e.data;if(!d||typeof d.type!=='string')return;
+    if(d.type==='aurea:toggle-play'){
+      document.getElementById('btnPlay').click();
+      sendState();
+    }else if(d.type==='aurea:save-png'){
+      document.getElementById('btnSaveImg').click();
+    }else if(d.type==='aurea:set-canvas-bg'){
+      canvasLightMode=!!d.light;
+    }else if(d.type==='aurea:start-rec'){
+      recDur=d.dur||30;
+      startRec();
+      sendState();
+    }else if(d.type==='aurea:stop-rec'){
+      stopRec();
+      setTimeout(sendState,200);
+    }
+  });
+  // Override onstop to notify parent
+  var origOnStop=null;
+  var origStartRec=startRec;
+  startRec=function(){
+    origStartRec();
+    if(recMR){
+      origOnStop=recMR.onstop;
+      recMR.onstop=function(){
+        origOnStop.apply(this,arguments);
+        setTimeout(sendState,100);
+      };
+    }
+    sendState();
+  };
+}
+</script>
+</body>
+</html>

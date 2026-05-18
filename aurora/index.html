@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Aurora</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;
+  /* ── THEME-AWARE OVERLAY ── */
+  --ov-bg:rgba(245,245,247,.97);
+  --ov-text:#1d1d1f;
+  --ov-dim:rgba(29,29,31,.36);
+  --ov-mid:rgba(29,29,31,.55);
+  --ov-strong:rgba(29,29,31,.75);
+  --ov-border:rgba(29,29,31,.1);
+  --ov-row-bg:rgba(29,29,31,.015);
+  --ov-row-border:rgba(29,29,31,.08);
+  --ov-key-bg:rgba(29,29,31,.06);
+  --ov-key-text:rgba(29,29,31,.5);
+  --ov-grid-bg:rgba(245,245,247,.5);
+  --ov-cta-bg:#1d1d1f;
+  --ov-cta-text:#f5f5f7;
+  --ov-dot:#1d1d1f;
+}
+html[data-theme="brutalist"]{
+  --ov-bg:rgba(255,255,255,.97);
+  --ov-text:#000;
+  --ov-dim:rgba(0,0,0,.4);
+  --ov-mid:rgba(0,0,0,.6);
+  --ov-strong:#000;
+  --ov-border:rgba(0,0,0,.15);
+  --ov-row-bg:rgba(0,0,0,.02);
+  --ov-row-border:rgba(0,0,0,.1);
+  --ov-key-bg:rgba(0,0,0,.08);
+  --ov-key-text:rgba(0,0,0,.55);
+  --ov-grid-bg:rgba(255,255,255,.5);
+  --ov-cta-bg:#000;
+  --ov-cta-text:#fff;
+  --ov-dot:#000;
+}
+html[data-theme="editorial"]{
+  --ov-bg:rgba(250,249,246,.97);
+  --ov-text:#1a1a1a;
+  --ov-dim:rgba(26,26,26,.36);
+  --ov-mid:rgba(26,26,26,.55);
+  --ov-strong:rgba(26,26,26,.75);
+  --ov-border:rgba(26,26,26,.1);
+  --ov-row-bg:rgba(26,26,26,.015);
+  --ov-row-border:rgba(26,26,26,.08);
+  --ov-key-bg:rgba(26,26,26,.06);
+  --ov-key-text:rgba(26,26,26,.5);
+  --ov-grid-bg:rgba(250,249,246,.5);
+  --ov-cta-bg:#1a1a1a;
+  --ov-cta-text:#faf9f6;
+  --ov-dot:#1a1a1a;
+}
+html[data-theme="terminal"]{
+  --ov-bg:rgba(10,10,10,.97);
+  --ov-text:#00ff41;
+  --ov-dim:rgba(0,255,65,.36);
+  --ov-mid:rgba(0,255,65,.55);
+  --ov-strong:rgba(0,255,65,.75);
+  --ov-border:rgba(0,255,65,.15);
+  --ov-row-bg:rgba(0,255,65,.02);
+  --ov-row-border:rgba(0,255,65,.1);
+  --ov-key-bg:rgba(0,255,65,.08);
+  --ov-key-text:rgba(0,255,65,.55);
+  --ov-grid-bg:rgba(10,10,10,.5);
+  --ov-cta-bg:#00ff41;
+  --ov-cta-text:#0a0a0a;
+  --ov-dot:#00ff41;
+}
+html[data-theme="zen"]{
+  --ov-bg:rgba(248,246,243,.97);
+  --ov-text:#2d2926;
+  --ov-dim:rgba(45,41,38,.36);
+  --ov-mid:rgba(45,41,38,.55);
+  --ov-strong:rgba(45,41,38,.75);
+  --ov-border:rgba(45,41,38,.1);
+  --ov-row-bg:rgba(45,41,38,.015);
+  --ov-row-border:rgba(45,41,38,.08);
+  --ov-key-bg:rgba(45,41,38,.06);
+  --ov-key-text:rgba(45,41,38,.5);
+  --ov-grid-bg:rgba(248,246,243,.5);
+  --ov-cta-bg:#2d2926;
+  --ov-cta-text:#f8f6f3;
+  --ov-dot:#2d2926;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:var(--font);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+canvas#c{display:block;width:100vw;height:100vh;filter:blur(90px) saturate(1.4)}
+canvas#stars{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:1;mix-blend-mode:screen}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:2;transition:background .8s ease}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:.035;mix-blend-mode:screen;transition:opacity .8s}
+.click-layer{position:fixed;inset:0;z-index:10}
+
+/* ── BOTTOM BAR ── */
+#bottombar{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  z-index:30;display:flex;align-items:center;gap:4px;
+  padding:5px 8px;border-radius:100px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.06);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  opacity:0;transition:opacity .4s ease;
+  pointer-events:none;
+  max-width:96vw;overflow-x:auto;
+  scrollbar-width:none;-ms-overflow-style:none;
+}
+#bottombar::-webkit-scrollbar{display:none}
+#bottombar.show{opacity:1;pointer-events:all}
+
+.pb{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;
+  min-height:44px;min-width:44px;padding:6px 14px;
+  border:none;background:none;border-radius:100px;
+  font-family:var(--font);font-size:.52rem;font-weight:400;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);cursor:pointer;
+  transition:color .15s,background .15s;
+  white-space:nowrap;line-height:1.2;
+  -webkit-tap-highlight-color:transparent;
+}
+.pb:hover{color:rgba(255,255,255,.7)}
+.pb:active{color:rgba(255,255,255,.9)}
+.pb.on{color:rgba(255,255,255,.9)}
+.pb.on::after{
+  content:'';
+  position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:3px;height:3px;border-radius:50%;
+  background:rgba(255,255,255,.6);
+}
+.kbk{
+  font-size:.34rem;opacity:.25;font-weight:300;
+  letter-spacing:.04em;margin-top:1px;
+}
+@media(hover:none) and (pointer:coarse){
+  .kbk{display:none}
+}
+
+/* ── TOP BAR ── */
+#topbar{
+  position:fixed;top:14px;right:14px;z-index:30;
+  display:flex;gap:5px;
+  opacity:0;transition:opacity .4s ease;
+  pointer-events:none;
+}
+#topbar.show{opacity:1;pointer-events:all}
+.tb{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:100px;
+  border:1px solid rgba(255,255,255,.12);background:none;
+  color:rgba(255,255,255,.35);font-family:var(--font);
+  font-size:13px;font-weight:300;cursor:pointer;
+  transition:border-color .2s,color .2s;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.tb:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.6)}
+.tb .kbk{
+  position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
+  font-size:.34rem;opacity:.25;font-weight:300;
+}
+
+/* ── SPLASH OVERLAY ── */
+.ov{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--ov-bg);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  transition:opacity .5s cubic-bezier(.4,0,.2,1);
+  padding:20px;overflow-y:auto;-webkit-user-select:none;user-select:none;
+  cursor:pointer;
+}
+.ov.hidden{opacity:0;pointer-events:none;visibility:hidden}
+.ov h1{
+  font-size:clamp(1rem,3.2vw,1.6rem);font-weight:200;
+  letter-spacing:.3em;color:var(--ov-text);margin-bottom:6px;text-align:center;
+}
+.ov .sub{
+  font-size:clamp(.55rem,.85vw,.68rem);font-weight:300;
+  letter-spacing:.1em;color:var(--ov-dim);line-height:2;
+  text-align:center;margin-bottom:28px;
+}
+
+/* Splash essentials */
+.splash-essentials{
+  display:grid;grid-template-columns:auto auto;
+  gap:6px 28px;font-size:clamp(.52rem,1vw,.62rem);
+  font-weight:300;letter-spacing:.06em;
+  color:var(--ov-mid);margin-bottom:10px;
+}
+.splash-essentials .key{
+  text-align:right;font-weight:400;
+  color:var(--ov-strong);letter-spacing:.08em;
+}
+.splash-essentials .desc{text-align:left}
+
+/* Full help grid */
+.help-full{display:none;width:100%;max-width:480px}
+.ov.help-mode .splash-essentials{display:none}
+.ov.help-mode .help-full{display:block}
+
+.sgrid{
+  border:1px solid var(--ov-border);border-radius:10px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;width:100%;
+  background:var(--ov-grid-bg);margin-bottom:16px;
+}
+@media(max-width:440px){.sgrid{grid-template-columns:1fr}}
+
+.srow{
+  display:flex;align-items:center;padding:9px 12px;gap:9px;
+  background:var(--ov-row-bg);
+  border-right:1px solid var(--ov-row-border);
+  border-bottom:1px solid var(--ov-row-border);
+}
+.srow:nth-child(2n){border-right:none}
+.srow:nth-last-child(-n+2){border-bottom:none}
+@media(max-width:440px){
+  .srow{border-right:none}
+  .srow:nth-last-child(-n+2){border-bottom:1px solid var(--ov-row-border)}
+  .srow:last-child{border-bottom:none}
+}
+.skey{
+  font-size:.5rem;font-weight:400;letter-spacing:.05em;
+  color:var(--ov-key-text);background:var(--ov-key-bg);
+  border:1px solid var(--ov-border);border-radius:4px;
+  padding:2px 7px;white-space:nowrap;flex-shrink:0;
+  min-width:40px;text-align:center;
+}
+.sdsc{font-size:.52rem;font-weight:300;letter-spacing:.04em;color:var(--ov-dim)}
+
+.section-label{
+  grid-column:1/-1;
+  font-size:.42rem;font-weight:400;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--ov-dim);
+  padding:10px 12px 4px;text-align:center;
+  border-bottom:1px solid var(--ov-row-border);
+}
+
+.help-desktop{display:block}
+.help-touch{display:none}
+@media(hover:none) and (pointer:coarse){
+  .help-desktop{display:none}
+  .help-touch{display:block}
+}
+
+/* CTA row */
+.cta-row{
+  margin-top:clamp(24px,4vh,44px);
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  font-size:.52rem;font-weight:300;letter-spacing:.06em;
+  color:var(--ov-dim);
+}
+.blink-dot{
+  width:5px;height:5px;border-radius:50%;background:var(--ov-dot);opacity:.4;
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.15}50%{opacity:.85}}
+</style>
+<script>
+(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)})();
+</script>
+
+    <link rel="canonical" href="https://toys.iamkesava.com/aurora/">
+    <meta property="og:url" content="https://toys.iamkesava.com/aurora/">
+    <meta property="og:title" content="Aurora, by Kesava">
+    <meta property="og:description" content="Move your cursor through living light. An interactive aurora borealis rendered in real time.">
+    <meta property="og:image" content="https://toys.iamkesava.com/aurora/og.svg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aurora, by Kesava">
+    <meta name="twitter:description" content="Move your cursor through living light. An interactive aurora borealis rendered in real time.">
+    <meta name="twitter:image" content="https://toys.iamkesava.com/aurora/og.svg">
+    <meta name="author" content="Kesava">
+    <meta name="description" content="Move your cursor through living light. An interactive aurora borealis rendered in real time.">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CreativeWork","@id":"https://toys.iamkesava.com/aurora/","name":"Aurora","description":"Move your cursor through living light. An interactive aurora borealis rendered in real time.","url":"https://toys.iamkesava.com/aurora/","keywords":"ambient, generative, light","author":{"@type":"Person","name":"Kesava","url":"https://iamkesava.com"},"publisher":{"@type":"Organization","name":"little toys","url":"https://toys.iamkesava.com"},"codeRepository":"https://github.com/k3sava/aurora","license":"https://opensource.org/licenses/MIT"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iamkesava","item":"https://iamkesava.com"},{"@type":"ListItem","position":2,"name":"toys","item":"https://toys.iamkesava.com/"},{"@type":"ListItem","position":3,"name":"Aurora","item":"https://toys.iamkesava.com/aurora/"}]}]}</script>
+  
+  
+    <link rel="stylesheet" href="/_chrome/chrome.css">
+    
+    <script src="/_chrome/theme.js" defer></script>
+    <script src="/_chrome/splash.js" defer></script>
+  
+  </head>
+<body>
+<div class="theme-switcher-container">
+  <button class="theme-switcher-pill" type="button" aria-label="Cycle theme (T)" title="Cycle theme (T)">
+    <span class="theme-switcher-pill-icon">○</span>
+  </button>
+</div>
+<nav class="kami-breadcrumb-fixed" aria-label="Breadcrumb">
+  <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+  <a href="https://toys.iamkesava.com/">toys</a><span class="sep">·</span><span class="current">Aurora</span>
+</nav>
+<div class="kami-shortcut-hint" aria-hidden="true">
+  <kbd>T</kbd> theme
+</div>
+<div class="kami-splash" role="status" aria-live="polite">
+  <h1 class="kami-splash-name">Aurora</h1>
+  <p class="kami-splash-tag">Move your cursor through living light. An interactive aurora borealis rendered in real tim</p>
+  <span class="kami-splash-dot"></span>
+  <div class="kami-splash-skip">press <kbd>esc</kbd> or click to begin</div>
+</div>
+<footer class="kami-footer-fixed" role="contentinfo">
+  <a href="https://apps.iamkesava.com/">apps</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://tools.iamkesava.com/">tools</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://toys.iamkesava.com/" aria-current="page" style="font-weight:600;color:var(--kami-text);">toys</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://codex.iamkesava.com/">codex</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://iamkesava.com" rel="author">kesava</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://github.com/k3sava/aurora" rel="noopener">github</a>
+</footer>
+
+<canvas id="c"></canvas>
+<canvas id="stars"></canvas>
+<div class="vignette" id="vig"></div>
+<canvas id="grain" class="grain"></canvas>
+<div class="click-layer" id="clk"></div>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <button class="tb" id="btn-help">?<span class="kbk">9</span></button>
+  <button class="tb" id="btn-reset">&#x21BA;<span class="kbk">0</span></button>
+</div>
+
+<!-- Bottom Bar -->
+<div id="bottombar">
+  <button class="pb on" id="pb-scene">Northern<span class="kbk">1-5</span></button>
+  <button class="pb" id="pb-zen">Zen<span class="kbk">Z</span></button>
+  <button class="pb" id="pb-sound">Sound<span class="kbk">S</span></button>
+  <button class="pb" id="pb-capture">Capture<span class="kbk">C</span></button>
+  <button class="pb" id="pb-fs">Fullscreen<span class="kbk">F</span></button>
+</div>
+
+<!-- SPLASH -->
+<div class="ov" id="spl">
+  <h1>aurora</h1>
+  <p class="sub">an ambient light experience</p>
+
+  <!-- Essential shortcuts (initial splash) -->
+  <div class="splash-essentials">
+    <span class="key">cursor</span><span class="desc">move to shape the light</span>
+    <span class="key">1 &ndash; 5</span><span class="desc">change scene</span>
+    <span class="key">Z</span><span class="desc">zen mode (hide everything)</span>
+  </div>
+
+  <!-- Full help (shown when ? reopens) -->
+  <div class="help-full help-desktop">
+    <div class="sgrid">
+      <div class="section-label">scenes</div>
+      <div class="srow"><div class="skey">1 - 5</div><div class="sdsc">switch scene</div></div>
+      <div class="srow"><div class="skey">Z</div><div class="sdsc">zen mode (hide UI)</div></div>
+      <div class="section-label">audio &amp; capture</div>
+      <div class="srow"><div class="skey">S</div><div class="sdsc">toggle ambient sound</div></div>
+      <div class="srow"><div class="skey">C</div><div class="sdsc">capture frame as PNG</div></div>
+      <div class="srow"><div class="skey">F</div><div class="sdsc">fullscreen</div></div>
+      <div class="section-label">interaction</div>
+      <div class="srow"><div class="skey">click</div><div class="sdsc">radial pulse</div></div>
+      <div class="srow"><div class="skey">dbl-click</div><div class="sdsc">gravity well</div></div>
+      <div class="srow"><div class="skey">scroll</div><div class="sdsc">adjust brightness</div></div>
+      <div class="srow"><div class="skey">cursor</div><div class="sdsc">warmth &amp; attraction</div></div>
+      <div class="section-label">other</div>
+      <div class="srow"><div class="skey">9</div><div class="sdsc">show this screen</div></div>
+      <div class="srow"><div class="skey">0</div><div class="sdsc">new / reset</div></div>
+    </div>
+  </div>
+
+  <div class="help-full help-touch">
+    <div class="sgrid">
+      <div class="section-label">touch</div>
+      <div class="srow"><div class="skey">tap</div><div class="sdsc">radial pulse</div></div>
+      <div class="srow"><div class="skey">double-tap</div><div class="sdsc">gravity well</div></div>
+      <div class="srow"><div class="skey">pinch</div><div class="sdsc">adjust brightness</div></div>
+      <div class="srow"><div class="skey">long press</div><div class="sdsc">toggle zen mode</div></div>
+      <div class="srow"><div class="skey">2-finger</div><div class="sdsc">next scene</div></div>
+      <div class="srow"><div class="skey">drag</div><div class="sdsc">attract blobs</div></div>
+    </div>
+  </div>
+
+  <div class="cta-row"><span class="blink-dot"></span> tap anywhere to begin</div>
+</div>
+
+<script>
+(() => {
+  const TAU = Math.PI * 2;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smoothstep = t => t * t * (3 - 2 * t);
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+  // ─── SCENES ──────────────────────────────────────────
+  const SCENES = [
+    { name:'Northern',   hues:[280,320,170,140,260,195], sats:[85,80,75,80,70,85],    lights:[45,40,45,40,42,38], vig:.7,  grain:.035 },
+    { name:'Sunset',     hues:[20,340,10,45,355,30],     sats:[90,85,80,88,75,92],    lights:[50,42,40,52,38,48], vig:.6,  grain:.04  },
+    { name:'Ocean',      hues:[210,195,185,200,220,175], sats:[80,85,75,90,70,82],    lights:[40,42,48,38,45,44], vig:.75, grain:.03  },
+    { name:'Neon',       hues:[330,180,60,140,290,50],   sats:[100,100,95,100,95,100], lights:[55,52,55,50,52,54], vig:.55, grain:.025 },
+    { name:'Mono', hues:[220,210,230,215,225,218], sats:[8,5,10,6,12,7],        lights:[65,58,70,55,62,60], vig:.8,  grain:.05  },
+  ];
+
+  let sceneIdx = 0;
+  let liveH = [...SCENES[0].hues];
+  let liveS = [...SCENES[0].sats];
+  let liveL = [...SCENES[0].lights];
+  let liveVig = SCENES[0].vig;
+  let liveGrain = SCENES[0].grain;
+  let fromH, fromS, fromL, fromVig, fromGrain;
+  let toH, toS, toL, toVig, toGrain;
+  let sceneFrac = 1;
+  let sceneT0 = 0;
+  const SCENE_DUR = 2000;
+
+  function setScene(idx) {
+    idx = clamp(idx, 0, 4);
+    if (idx === sceneIdx && sceneFrac >= 1) return;
+    fromH = [...liveH]; fromS = [...liveS]; fromL = [...liveL];
+    fromVig = liveVig; fromGrain = liveGrain;
+    const s = SCENES[idx];
+    toH = [...s.hues]; toS = [...s.sats]; toL = [...s.lights];
+    toVig = s.vig; toGrain = s.grain;
+    sceneIdx = idx;
+    sceneFrac = 0;
+    sceneT0 = performance.now();
+    syncUI();
+  }
+
+  function tickScene(now) {
+    if (sceneFrac >= 1) return;
+    sceneFrac = clamp((now - sceneT0) / SCENE_DUR, 0, 1);
+    const t = smoothstep(sceneFrac);
+    for (let i = 0; i < 6; i++) {
+      liveH[i] = lerp(fromH[i], toH[i], t);
+      liveS[i] = lerp(fromS[i], toS[i], t);
+      liveL[i] = lerp(fromL[i], toL[i], t);
+    }
+    liveVig = lerp(fromVig, toVig, t);
+    liveGrain = lerp(fromGrain, toGrain, t);
+  }
+
+  // ─── STAR FIELD ──────────────────────────────────────
+  const starCvs = document.getElementById('stars');
+  const starCtx = starCvs.getContext('2d');
+  let stars = [];
+
+  function initStars() {
+    starCvs.width = innerWidth;
+    starCvs.height = innerHeight;
+    stars = [];
+    const n = Math.round((innerWidth * innerHeight) / 4000);
+    for (let i = 0; i < n; i++) {
+      stars.push({
+        x: Math.random() * starCvs.width,
+        y: Math.random() * starCvs.height,
+        r: .3 + Math.random() * 1.1,
+        phase: Math.random() * TAU,
+        speed: .004 + Math.random() * .014,
+        base: .2 + Math.random() * .55,
+      });
+    }
+  }
+  initStars();
+
+  function drawStars(t) {
+    starCtx.clearRect(0, 0, starCvs.width, starCvs.height);
+    for (const s of stars) {
+      const a = s.base * (.35 + .65 * (.5 + .5 * Math.sin(t * s.speed + s.phase)));
+      starCtx.fillStyle = `rgba(255,255,255,${a})`;
+      starCtx.beginPath();
+      starCtx.arc(s.x, s.y, s.r, 0, TAU);
+      starCtx.fill();
+    }
+  }
+
+  // ─── GRAIN ───────────────────────────────────────────
+  const grainCvs = document.getElementById('grain');
+  const grainCtx = grainCvs.getContext('2d');
+  function genGrain() {
+    grainCvs.width = innerWidth >> 1;
+    grainCvs.height = innerHeight >> 1;
+    const img = grainCtx.createImageData(grainCvs.width, grainCvs.height);
+    const d = img.data;
+    for (let i = 0; i < d.length; i += 4) {
+      const v = Math.random() * 255;
+      d[i] = d[i+1] = d[i+2] = v; d[i+3] = 255;
+    }
+    grainCtx.putImageData(img, 0, 0);
+  }
+  genGrain();
+
+  // ─── MAIN CANVAS ─────────────────────────────────────
+  const cvs = document.getElementById('c');
+  const ctx = cvs.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = innerWidth; H = innerHeight;
+    const sc = .4;
+    cvs.width = W * sc; cvs.height = H * sc;
+    ctx.setTransform(sc, 0, 0, sc, 0, 0);
+    genGrain();
+    initStars();
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  // ─── CURSOR ──────────────────────────────────────────
+  const cur = { x: W / 2, y: H / 2, on: false };
+  const sCur = { x: W / 2, y: H / 2 };
+
+  function onMove(x, y) { cur.x = x; cur.y = y; cur.on = true; }
+  addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+  addEventListener('touchmove', e => { e.preventDefault(); onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+  addEventListener('mouseleave', () => { cur.on = false; });
+  addEventListener('touchend', () => { cur.on = false; });
+
+  // ─── MODES ───────────────────────────────────────────
+  let zen = false;
+  let soundOn = false;
+  let brightness = 1;
+
+  // Pulses
+  let pulses = [];
+  // Black holes
+  let holes = [];
+
+  // ─── DOM REFS ────────────────────────────────────────
+  const bottombar = document.getElementById('bottombar');
+  const topbar = document.getElementById('topbar');
+  const btnHelp = document.getElementById('btn-help');
+  const btnReset = document.getElementById('btn-reset');
+  const pbScene = document.getElementById('pb-scene');
+  const pbZen = document.getElementById('pb-zen');
+  const pbSound = document.getElementById('pb-sound');
+  const pbCapture = document.getElementById('pb-capture');
+  const pbFs = document.getElementById('pb-fs');
+
+  // ─── UI SYNC ─────────────────────────────────────────
+  function syncUI() {
+    // Scene button
+    pbScene.childNodes[0].textContent = SCENES[sceneIdx].name;
+    pbScene.classList.add('on');
+
+    // Zen
+    pbZen.classList.toggle('on', zen);
+
+    // Sound
+    pbSound.classList.toggle('on', soundOn);
+
+    // Fullscreen
+    pbFs.classList.toggle('on', !!document.fullscreenElement);
+
+    // Zen mode: hide/show bars
+    if (zen) {
+      bottombar.classList.remove('show');
+      topbar.classList.remove('show');
+    } else if (!splOn) {
+      bottombar.classList.add('show');
+      topbar.classList.add('show');
+    }
+  }
+
+  // ─── BOTTOM BAR CLICK HANDLERS ──────────────────────
+  pbScene.addEventListener('click', e => {
+    e.stopPropagation();
+    setScene((sceneIdx + 1) % 5);
+  });
+
+  pbZen.addEventListener('click', e => {
+    e.stopPropagation();
+    zen = !zen;
+    syncUI();
+  });
+
+  pbSound.addEventListener('click', e => {
+    e.stopPropagation();
+    soundOn = !soundOn;
+    syncUI();
+  });
+
+  pbCapture.addEventListener('click', e => {
+    e.stopPropagation();
+    captureFrame();
+  });
+
+  pbFs.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen().catch(()=>{});
+    setTimeout(syncUI, 200);
+  });
+
+  // ─── BLOBS ───────────────────────────────────────────
+  const N = 6;
+  const blobs = [];
+  for (let i = 0; i < N; i++) {
+    blobs.push({
+      ax: .15 + Math.random() * .25,
+      ay: .15 + Math.random() * .2,
+      fx: .3 + Math.random() * .4,
+      fy: .3 + Math.random() * .4,
+      px: Math.random() * TAU,
+      py: Math.random() * TAU,
+      x: W / 2, y: H / 2,
+      ox: 0, oy: 0,
+      vx: 0, vy: 0,
+      baseR: 250 + Math.random() * 200,
+      hOff: 0,
+      hSpd: .08 + Math.random() * .06,
+      hDir: Math.random() > .5 ? 1 : -1,
+      bPhase: Math.random() * TAU,
+      bSpd: .008 + Math.random() * .005,
+      alpha: .6 + Math.random() * .3,
+      warmth: 0,
+    });
+  }
+
+  // ─── RESET ───────────────────────────────────────────
+  function resetAll() {
+    setScene(Math.floor(Math.random() * 5));
+    brightness = 1;
+    zen = false;
+    // Randomize blob positions
+    for (let i = 0; i < N; i++) {
+      blobs[i].px = Math.random() * TAU;
+      blobs[i].py = Math.random() * TAU;
+      blobs[i].ox = 0; blobs[i].oy = 0;
+      blobs[i].vx = 0; blobs[i].vy = 0;
+      blobs[i].hOff = 0;
+      blobs[i].warmth = 0;
+    }
+    pulses = [];
+    holes = [];
+    syncUI();
+  }
+
+  // ─── INTERACTIONS ────────────────────────────────────
+  const clk = document.getElementById('clk');
+  let lastTap = 0, lastTapX = 0, lastTapY = 0;
+
+  function doPulse(x, y) {
+    pulses.push({ x, y, r: 0, max: Math.max(W, H) * .8, str: 1 });
+  }
+  function doHole(x, y) {
+    holes.push({ x, y, born: performance.now(), dur: 2000, str: 300, cur: 300 });
+  }
+
+  function handleTap(x, y) {
+    const now = performance.now();
+    const dx = x - lastTapX, dy = y - lastTapY;
+    if (now - lastTap < 350 && Math.sqrt(dx*dx+dy*dy) < 50) {
+      doHole(x, y);
+      lastTap = 0;
+    } else {
+      doPulse(x, y);
+      lastTap = now;
+    }
+    lastTapX = x; lastTapY = y;
+  }
+
+  clk.addEventListener('click', e => handleTap(e.clientX, e.clientY));
+
+  // Long press -> zen (touch)
+  let lpTimer = null;
+  clk.addEventListener('touchstart', e => {
+    const t = e.touches[0];
+    if (e.touches.length === 2) {
+      setScene((sceneIdx + 1) % 5);
+      return;
+    }
+    lpTimer = setTimeout(() => { zen = !zen; syncUI(); lpTimer = null; }, 600);
+  }, { passive: true });
+  clk.addEventListener('touchend', () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } });
+  clk.addEventListener('touchmove', () => { if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; } }, { passive: true });
+
+  // Scroll / pinch -> brightness
+  clk.addEventListener('wheel', e => {
+    e.preventDefault();
+    brightness = clamp(brightness - e.deltaY * .001, .15, 2.2);
+  }, { passive: false });
+
+  let pinchDist = 0;
+  clk.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchDist = Math.sqrt(dx*dx+dy*dy);
+    }
+  }, { passive: true });
+  clk.addEventListener('touchmove', e => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const d = Math.sqrt(dx*dx+dy*dy);
+      brightness = clamp(brightness + (d - pinchDist) * .003, .15, 2.2);
+      pinchDist = d;
+    }
+  }, { passive: false });
+
+  // ─── SPLASH ──────────────────────────────────────────
+  const spl = document.getElementById('spl');
+  let splOn = true;
+  let helpMode = false;
+
+  function dismissSplash() {
+    if (!splOn) return;
+    splOn = false;
+    helpMode = false;
+    spl.classList.add('hidden');
+    spl.classList.remove('help-mode');
+    clk.style.pointerEvents = 'auto';
+    if (!zen) {
+      bottombar.classList.add('show');
+      topbar.classList.add('show');
+    }
+  }
+
+  function showHelp() {
+    splOn = true;
+    helpMode = true;
+    spl.classList.remove('hidden');
+    spl.classList.add('help-mode');
+    clk.style.pointerEvents = 'none';
+  }
+
+  function showSplash() {
+    splOn = true;
+    helpMode = false;
+    spl.classList.remove('hidden');
+    spl.classList.remove('help-mode');
+    clk.style.pointerEvents = 'none';
+  }
+
+  spl.addEventListener('click', () => { if (splOn) dismissSplash(); });
+  btnHelp.addEventListener('click', e => { e.stopPropagation(); showHelp(); });
+  btnReset.addEventListener('click', e => { e.stopPropagation(); resetAll(); });
+  clk.style.pointerEvents = 'none';
+
+  // ─── KEYBOARD ────────────────────────────────────────
+  addEventListener('keydown', e => {
+    const k = e.key;
+
+    if (splOn && k !== '9' && k !== '?') { dismissSplash(); return; }
+
+    if (k >= '1' && k <= '5') { setScene(parseInt(k) - 1); return; }
+    if (k === '9' || k === '?') {
+      if (splOn) dismissSplash();
+      else showHelp();
+      return;
+    }
+    if (k === '0') { resetAll(); return; }
+
+    const kl = k.toLowerCase();
+    if (kl === 'z') { zen = !zen; syncUI(); return; }
+    if (kl === 's') { soundOn = !soundOn; syncUI(); return; }
+    if (kl === 'f') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+      else document.exitFullscreen().catch(()=>{});
+      setTimeout(syncUI, 200);
+      return;
+    }
+    if (kl === 'c') { captureFrame(); return; }
+  });
+
+  // ─── CAPTURE ─────────────────────────────────────────
+  function captureFrame() {
+    const cap = document.createElement('canvas');
+    cap.width = W; cap.height = H;
+    const cc = cap.getContext('2d');
+    cc.drawImage(starCvs, 0, 0);
+    cc.filter = 'blur(90px) saturate(1.4)';
+    cc.drawImage(cvs, 0, 0, W, H);
+    cc.filter = 'none';
+    const vg = cc.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*.7);
+    vg.addColorStop(0, 'transparent');
+    vg.addColorStop(.4, 'transparent');
+    vg.addColorStop(1, `rgba(0,0,0,${liveVig})`);
+    cc.fillStyle = vg;
+    cc.fillRect(0, 0, W, H);
+    cap.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `aurora-${Date.now()}.png`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }, 'image/png');
+  }
+
+  // ─── ANIMATION ───────────────────────────────────────
+  let t = 0;
+  let prev = performance.now();
+  const vigEl = document.getElementById('vig');
+  const speedMul = 1;
+
+  function frame(now) {
+    const raw = now - prev;
+    prev = now;
+    const dt = Math.min(raw, 50);
+    t += dt * .06 * speedMul;
+
+    // Scene blend
+    tickScene(now);
+
+    // Vignette + grain
+    vigEl.style.background = `radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,${liveVig}) 100%)`;
+    grainCvs.style.opacity = liveGrain;
+
+    // Smooth cursor
+    sCur.x += (cur.x - sCur.x) * .04;
+    sCur.y += (cur.y - sCur.y) * .04;
+
+    // Update pulses
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      const p = pulses[i];
+      p.r += 12 * speedMul * dt * .06;
+      p.str = Math.max(0, 1 - p.r / p.max);
+      if (p.str <= 0) pulses.splice(i, 1);
+    }
+
+    // Update holes
+    for (let i = holes.length - 1; i >= 0; i--) {
+      const h = holes[i];
+      const age = now - h.born;
+      if (age > h.dur) { holes.splice(i, 1); continue; }
+      h.cur = h.str * (1 - age / h.dur);
+    }
+
+    // ─── CLEAR ─────────────────────
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+
+    const syncPhase = t * .015;
+
+    for (let i = 0; i < N; i++) {
+      const b = blobs[i];
+
+      // Base position
+      let bx, by;
+      if (zen) {
+        bx = W/2 + Math.sin(t*.003*b.fx + b.px + t*.0002) * W * b.ax;
+        by = H/2 + Math.sin(t*.003*b.fy + b.py + t*.00015) * H * b.ay;
+      } else {
+        bx = W/2 + Math.sin(t*.005*b.fx + b.px) * W * b.ax;
+        by = H/2 + Math.sin(t*.005*b.fy + b.py) * H * b.ay;
+      }
+
+      // Cursor attraction + warmth
+      if (cur.on && !zen) {
+        const dx = sCur.x - b.x, dy = sCur.y - b.y;
+        const d = Math.sqrt(dx*dx + dy*dy) || 1;
+        const inf = Math.max(0, 1 - d / (Math.max(W,H) * .6));
+        const f = inf * inf * 120;
+        b.ox += (dx/d) * f * .01;
+        b.oy += (dy/d) * f * .01;
+        b.warmth += (inf * .5 - b.warmth) * .05;
+      } else {
+        b.warmth += (0 - b.warmth) * .02;
+      }
+
+      // Pulse forces
+      for (const p of pulses) {
+        const dx = b.x - p.x, dy = b.y - p.y;
+        const d = Math.sqrt(dx*dx + dy*dy) || 1;
+        const ring = Math.abs(d - p.r);
+        if (ring < 200) {
+          const f = p.str * (1 - ring/200) * 8;
+          b.vx += (dx/d) * f;
+          b.vy += (dy/d) * f;
+        }
+      }
+
+      // Black hole forces
+      for (const h of holes) {
+        const dx = h.x - b.x, dy = h.y - b.y;
+        const d = Math.sqrt(dx*dx + dy*dy) || 1;
+        const f = h.cur / (d * .1 + 1);
+        b.vx += (dx/d) * f * .06;
+        b.vy += (dy/d) * f * .06;
+      }
+
+      // Damping
+      b.ox *= .96; b.oy *= .96;
+      b.vx *= .94; b.vy *= .94;
+
+      b.x = bx + b.ox + b.vx;
+      b.y = by + b.oy + b.vy;
+
+      // Breathing
+      b.bPhase += b.bSpd * speedMul;
+      const bScale = .95 + .1 * Math.sin(b.bPhase);
+      const r = b.baseR * bScale;
+
+      // Color
+      b.hOff += b.hSpd * b.hDir * speedMul * .016;
+      if (b.hOff > 30) b.hDir = -1;
+      if (b.hOff < -30) b.hDir = 1;
+      const hue = liveH[i] + b.hOff;
+      const sat = liveS[i] + Math.sin(t*.003 + b.px) * 10;
+      const lit = liveL[i] + Math.sin(t*.004 + b.py) * 8;
+
+      // Alpha with brightness and warmth
+      const a = b.alpha * brightness * (1 + b.warmth * .6);
+
+      // Primary blob
+      const g1 = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, r);
+      g1.addColorStop(0,   `hsla(${hue},${sat}%,${lit}%,${a})`);
+      g1.addColorStop(.3,  `hsla(${hue},${sat}%,${lit}%,${a*.4})`);
+      g1.addColorStop(1,   `hsla(${hue},${sat}%,${lit}%,0)`);
+      ctx.fillStyle = g1;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, r, 0, TAU);
+      ctx.fill();
+
+      // Secondary glow
+      const gx = b.x + Math.sin(t*.003 + b.py) * 40;
+      const gy = b.y + Math.cos(t*.004 + b.px) * 30;
+      const g2 = ctx.createRadialGradient(gx, gy, 0, b.x, b.y, r*.8);
+      g2.addColorStop(0,  `hsla(${hue+20},${sat+5}%,${lit+10}%,${a*.3})`);
+      g2.addColorStop(.5, `hsla(${hue+20},${sat}%,${lit}%,${a*.1})`);
+      g2.addColorStop(1,  `hsla(${hue+20},${sat}%,${lit}%,0)`);
+      ctx.fillStyle = g2;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, r*.8, 0, TAU);
+      ctx.fill();
+    }
+
+    // Stars
+    drawStars(now * .001);
+
+    // Grain refresh
+    if (Math.random() < .015) genGrain();
+
+    requestAnimationFrame(frame);
+  }
+
+  syncUI();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

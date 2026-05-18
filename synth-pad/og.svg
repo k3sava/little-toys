@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f0f1e"/>
+      <stop offset="1" stop-color="#1a1530"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="6" fill="#ec4899"/>
+  <g transform="translate(80, 60)">
+    <circle cx="0" cy="14" r="6" fill="#c084fc"/>
+    <text x="16" y="20" font-family="DM Sans, system-ui, sans-serif" font-size="22" fill="#fafafa">little toys</text>
+  </g>
+  <text x="80" y="180" font-family="JetBrains Mono, monospace" font-size="16" fill="#ec4899" letter-spacing="2">AUDIO</text>
+  <text x="80" y="290" font-family="Cormorant Garamond, serif" font-size="86" font-weight="500" fill="#fafafa">Synth Pad</text>
+  <text x="80" y="380" font-family="Source Serif 4, serif" font-size="28" fill="#a78bfa">Touch or click and drag to play. An XY pad instrument with pentatonic tuning and warm osci</text>
+  <text x="80" y="540" font-family="JetBrains Mono, monospace" font-size="20" fill="#a78bfa">By Kesava</text>
+  <text x="1120" y="570" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="14" fill="#71717a">toys.iamkesava.com/synth-pad/</text>
+</svg>

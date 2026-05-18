@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>string art</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f5f7;--ink:#1d1d1f;--mid:rgba(29,29,31,.58);--dim:rgba(29,29,31,.36);
+  --bd:rgba(29,29,31,.11);--font:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;
+  /* ── THEME-AWARE OVERLAY ── */
+  --ov-bg:rgba(245,245,247,.97);
+  --ov-text:#1d1d1f;
+  --ov-dim:rgba(29,29,31,.36);
+  --ov-mid:rgba(29,29,31,.55);
+  --ov-strong:rgba(29,29,31,.75);
+  --ov-border:rgba(29,29,31,.1);
+  --ov-row-bg:rgba(29,29,31,.015);
+  --ov-row-border:rgba(29,29,31,.08);
+  --ov-key-bg:rgba(29,29,31,.06);
+  --ov-key-text:rgba(29,29,31,.5);
+  --ov-grid-bg:rgba(245,245,247,.5);
+  --ov-cta-bg:#1d1d1f;
+  --ov-cta-text:#f5f5f7;
+  --ov-dot:#1d1d1f;
+}
+html[data-theme="brutalist"]{
+  --ov-bg:rgba(255,255,255,.97);
+  --ov-text:#000;
+  --ov-dim:rgba(0,0,0,.4);
+  --ov-mid:rgba(0,0,0,.6);
+  --ov-strong:#000;
+  --ov-border:rgba(0,0,0,.15);
+  --ov-row-bg:rgba(0,0,0,.02);
+  --ov-row-border:rgba(0,0,0,.1);
+  --ov-key-bg:rgba(0,0,0,.08);
+  --ov-key-text:rgba(0,0,0,.55);
+  --ov-grid-bg:rgba(255,255,255,.5);
+  --ov-cta-bg:#000;
+  --ov-cta-text:#fff;
+  --ov-dot:#000;
+}
+html[data-theme="editorial"]{
+  --ov-bg:rgba(250,249,246,.97);
+  --ov-text:#1a1a1a;
+  --ov-dim:rgba(26,26,26,.36);
+  --ov-mid:rgba(26,26,26,.55);
+  --ov-strong:rgba(26,26,26,.75);
+  --ov-border:rgba(26,26,26,.1);
+  --ov-row-bg:rgba(26,26,26,.015);
+  --ov-row-border:rgba(26,26,26,.08);
+  --ov-key-bg:rgba(26,26,26,.06);
+  --ov-key-text:rgba(26,26,26,.5);
+  --ov-grid-bg:rgba(250,249,246,.5);
+  --ov-cta-bg:#1a1a1a;
+  --ov-cta-text:#faf9f6;
+  --ov-dot:#1a1a1a;
+}
+html[data-theme="terminal"]{
+  --ov-bg:rgba(10,10,10,.97);
+  --ov-text:#00ff41;
+  --ov-dim:rgba(0,255,65,.36);
+  --ov-mid:rgba(0,255,65,.55);
+  --ov-strong:rgba(0,255,65,.75);
+  --ov-border:rgba(0,255,65,.15);
+  --ov-row-bg:rgba(0,255,65,.02);
+  --ov-row-border:rgba(0,255,65,.1);
+  --ov-key-bg:rgba(0,255,65,.08);
+  --ov-key-text:rgba(0,255,65,.55);
+  --ov-grid-bg:rgba(10,10,10,.5);
+  --ov-cta-bg:#00ff41;
+  --ov-cta-text:#0a0a0a;
+  --ov-dot:#00ff41;
+}
+html[data-theme="zen"]{
+  --ov-bg:rgba(248,246,243,.97);
+  --ov-text:#2d2926;
+  --ov-dim:rgba(45,41,38,.36);
+  --ov-mid:rgba(45,41,38,.55);
+  --ov-strong:rgba(45,41,38,.75);
+  --ov-border:rgba(45,41,38,.1);
+  --ov-row-bg:rgba(45,41,38,.015);
+  --ov-row-border:rgba(45,41,38,.08);
+  --ov-key-bg:rgba(45,41,38,.06);
+  --ov-key-text:rgba(45,41,38,.5);
+  --ov-grid-bg:rgba(248,246,243,.5);
+  --ov-cta-bg:#2d2926;
+  --ov-cta-text:#f8f6f3;
+  --ov-dot:#2d2926;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a}
+canvas{display:block;cursor:crosshair}
+
+/* ─── PRESET FLASH ──────────────────────────── */
+#preset-flash{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  font:200 clamp(1.2rem,4vw,2.4rem)/1 var(--font);letter-spacing:.3em;
+  color:rgba(255,255,255,.7);pointer-events:none;
+  opacity:0;transition:opacity .4s ease;z-index:10;
+}
+#preset-flash.vis{opacity:1}
+
+/* ─── RECORDING INDICATOR ─────────────────────── */
+#rec-dot{
+  position:fixed;top:16px;left:16px;
+  display:none;align-items:center;gap:6px;
+  font:300 11px/1 var(--font);letter-spacing:.06em;color:rgba(255,80,80,.7);
+  pointer-events:none;z-index:31;
+}
+#rec-dot::before{
+  content:'';display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:rgba(255,60,60,.8);animation:blink .8s ease-in-out infinite;
+}
+#rec-dot.active{display:flex}
+
+/* ─── SPLASH OVERLAY ─────────────────────────── */
+.ov{
+  position:fixed;inset:0;z-index:40;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--ov-bg);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  transition:opacity .5s cubic-bezier(.4,0,.2,1);
+  padding:20px;overflow-y:auto;
+}
+.ov.gone{opacity:0;pointer-events:none}
+.spl-inner{max-width:490px;width:100%;display:flex;flex-direction:column;align-items:center}
+.spl-title{
+  font-size:clamp(.92rem,3vw,1.5rem);font-weight:200;
+  letter-spacing:.3em;color:var(--ov-text);margin-bottom:7px;text-align:center;
+}
+.spl-desc{
+  font-size:clamp(.54rem,.82vw,.66rem);font-weight:300;
+  letter-spacing:.1em;color:var(--ov-dim);line-height:2;
+  text-align:center;margin-bottom:24px;max-width:360px;
+}
+
+.sck{display:block;width:100%;margin-bottom:0}
+.sct{display:none;width:100%;margin-bottom:0}
+@media(hover:none) and (pointer:coarse){.sck{display:none}.sct{display:block}}
+
+.sgrid{
+  border:1px solid var(--ov-border);border-radius:10px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;width:100%;background:var(--ov-grid-bg);
+}
+@media(max-width:440px){.sgrid{grid-template-columns:1fr}}
+.srow{
+  display:flex;align-items:center;padding:9px 12px;gap:9px;
+  background:var(--ov-row-bg);border-right:1px solid var(--ov-row-border);border-bottom:1px solid var(--ov-row-border);
+}
+.srow:nth-child(2n){border-right:none}
+.srow:nth-last-child(-n+2){border-bottom:none}
+.srow.cta{background:var(--ov-key-bg);border-bottom:none;grid-column:1/-1}
+.srow.cta .skey{color:var(--ov-strong);border-color:var(--ov-border);background:var(--ov-key-bg);letter-spacing:.06em}
+.cta-phrase{display:flex;align-items:center;gap:7px;flex-wrap:nowrap}
+.cta-word{font-size:.52rem;font-weight:300;letter-spacing:.07em;color:var(--ov-mid);white-space:nowrap}
+.blink-dot{
+  display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--ov-dot);opacity:.4;flex-shrink:0;margin-left:4px;
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.15}50%{opacity:.85}}
+.skey{
+  font-size:.5rem;font-weight:400;letter-spacing:.06em;
+  color:var(--ov-key-text);background:var(--ov-key-bg);
+  border:1px solid var(--ov-border);border-radius:4px;
+  padding:2px 7px;white-space:nowrap;flex-shrink:0;min-width:38px;text-align:center;
+}
+.sdsc{font-size:.52rem;font-weight:300;letter-spacing:.05em;color:var(--ov-dim)}
+@media(max-width:440px){
+  .srow{border-right:none}
+  .srow:nth-last-child(-n+2){border-bottom:1px solid var(--ov-row-border)}
+  .srow:last-child{border-bottom:none}
+  .srow.cta{border-bottom:none}
+}
+
+/* ─── BOTTOM CONTROL BAR ────────────────────── */
+#controlbar{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:30;display:flex;align-items:center;gap:3px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.06);
+  border-radius:100px;padding:4px 6px;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+  overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;
+  max-width:calc(100vw - 32px);
+}
+#controlbar::-webkit-scrollbar{display:none}
+#controlbar.show{opacity:1;pointer-events:auto}
+
+.pb{
+  font:400 .56rem/1 var(--font);letter-spacing:.08em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);background:none;border:none;
+  border-radius:100px;padding:0 14px;min-height:44px;
+  cursor:pointer;white-space:nowrap;position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:color .2s;-webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.pb:hover{color:rgba(255,255,255,.7)}
+.pb.on{color:rgba(255,255,255,.9)}
+.pb.on::after{
+  content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.6);
+}
+.pb .kbk{
+  font-size:.34rem;opacity:.25;font-weight:300;letter-spacing:.04em;
+}
+@media(hover:none) and (pointer:coarse){.pb .kbk{display:none}}
+
+/* ─── TOP BAR ───────────────────────────────── */
+#topbar{
+  position:fixed;top:14px;right:14px;z-index:30;
+  display:flex;gap:5px;
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+}
+#topbar.show{opacity:1;pointer-events:auto}
+
+.tb{
+  font:300 13px/1 var(--font);
+  color:rgba(255,255,255,.35);background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.12);border-radius:100px;
+  min-width:36px;height:32px;padding:0 10px;
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  cursor:pointer;transition:all .3s;position:relative;
+  -webkit-tap-highlight-color:transparent;
+}
+.tb:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6)}
+.tb .kbk{
+  font-size:.34rem;opacity:.25;font-weight:300;position:absolute;
+  bottom:3px;right:7px;
+}
+@media(hover:none) and (pointer:coarse){.tb .kbk{display:none}}
+</style>
+<script>
+(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)})();
+</script>
+
+    <link rel="canonical" href="https://toys.iamkesava.com/string-art/">
+    <meta property="og:url" content="https://toys.iamkesava.com/string-art/">
+    <meta property="og:title" content="String Art, by Kesava">
+    <meta property="og:description" content="Modular multiplication on geometric shapes creates impossibly intricate patterns. Move your cursor to shape the strings.">
+    <meta property="og:image" content="https://toys.iamkesava.com/string-art/og.svg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="String Art, by Kesava">
+    <meta name="twitter:description" content="Modular multiplication on geometric shapes creates impossibly intricate patterns. Move your cursor to shape the strings.">
+    <meta name="twitter:image" content="https://toys.iamkesava.com/string-art/og.svg">
+    <meta name="author" content="Kesava">
+    <meta name="description" content="Modular multiplication on geometric shapes creates impossibly intricate patterns. Move your cursor to shape the strings.">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CreativeWork","@id":"https://toys.iamkesava.com/string-art/","name":"String Art","description":"Modular multiplication on geometric shapes creates impossibly intricate patterns. Move your cursor to shape the strings.","url":"https://toys.iamkesava.com/string-art/","keywords":"generative, geometry, modular","author":{"@type":"Person","name":"Kesava","url":"https://iamkesava.com"},"publisher":{"@type":"Organization","name":"little toys","url":"https://toys.iamkesava.com"},"codeRepository":"https://github.com/k3sava/string-art","license":"https://opensource.org/licenses/MIT"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iamkesava","item":"https://iamkesava.com"},{"@type":"ListItem","position":2,"name":"toys","item":"https://toys.iamkesava.com/"},{"@type":"ListItem","position":3,"name":"String Art","item":"https://toys.iamkesava.com/string-art/"}]}]}</script>
+  
+  
+    <link rel="stylesheet" href="/_chrome/chrome.css">
+    
+    <script src="/_chrome/theme.js" defer></script>
+    <script src="/_chrome/splash.js" defer></script>
+  
+  </head>
+<body>
+<div class="theme-switcher-container">
+  <button class="theme-switcher-pill" type="button" aria-label="Cycle theme (T)" title="Cycle theme (T)">
+    <span class="theme-switcher-pill-icon">○</span>
+  </button>
+</div>
+<nav class="kami-breadcrumb-fixed" aria-label="Breadcrumb">
+  <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+  <a href="https://toys.iamkesava.com/">toys</a><span class="sep">·</span><span class="current">String Art</span>
+</nav>
+<div class="kami-shortcut-hint" aria-hidden="true">
+  <kbd>T</kbd> theme
+</div>
+
+<footer class="kami-footer-fixed" role="contentinfo">
+  <a href="https://apps.iamkesava.com/">apps</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://tools.iamkesava.com/">tools</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://toys.iamkesava.com/" aria-current="page" style="font-weight:600;color:var(--kami-text);">toys</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://codex.iamkesava.com/">codex</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://iamkesava.com" rel="author">kesava</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://github.com/k3sava/string-art" rel="noopener">github</a>
+</footer>
+
+<canvas id="canvas"></canvas>
+<div id="preset-flash"></div>
+<div id="rec-dot">rec</div>
+
+<!-- ─── TOP BAR ───────────────────────────────── -->
+<div id="topbar">
+  <button class="tb" id="btn-help">?<span class="kbk">9</span></button>
+  <button class="tb" id="btn-save">&#x1F4BE; Save<span class="kbk">E</span></button>
+</div>
+
+<!-- ─── BOTTOM CONTROL BAR ────────────────────── -->
+<div id="controlbar">
+  <button class="pb" id="btn-preset">Preset<span class="kbk">P</span></button>
+  <button class="pb" id="btn-shape">Shape<span class="kbk">S</span></button>
+  <button class="pb" id="btn-color">Color<span class="kbk">C</span></button>
+  <button class="pb" id="btn-mirror">Mirror<span class="kbk">M</span></button>
+  <button class="pb" id="btn-animate">Animate<span class="kbk">A</span></button>
+</div>
+
+<!-- ─── SPLASH ────────────────────────────────── -->
+<div class="ov" id="splash">
+  <div class="spl-inner">
+    <div class="spl-title">string art</div>
+    <div class="spl-desc">mathematics made visible</div>
+
+    <!-- Desktop shortcuts (essential only) -->
+    <div class="sck sgrid">
+      <div class="srow"><span class="skey">Scroll</span><span class="sdsc">change the pattern</span></div>
+      <div class="srow"><span class="skey">P</span><span class="sdsc">switch preset</span></div>
+      <div class="srow"><span class="skey">Space</span><span class="sdsc">start / stop animation</span></div>
+      <div class="srow cta">
+        <span class="skey">Enter</span>
+        <span class="cta-phrase"><span class="cta-word">tap anywhere to begin</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+
+    <!-- Touch shortcuts (essential only) -->
+    <div class="sct sgrid">
+      <div class="srow"><span class="skey">Pinch</span><span class="sdsc">change the pattern</span></div>
+      <div class="srow"><span class="skey">Swipe</span><span class="sdsc">switch preset</span></div>
+      <div class="srow"><span class="skey">Tap</span><span class="sdsc">cycle presets</span></div>
+      <div class="srow cta">
+        <span class="skey">Tap</span>
+        <span class="cta-phrase"><span class="cta-word">tap anywhere to begin</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── HELP OVERLAY ─────────────────────────── -->
+<div class="ov gone" id="help-overlay">
+  <div class="spl-inner">
+    <div class="spl-title">string art</div>
+    <div class="spl-desc">all shortcuts</div>
+
+    <!-- Desktop shortcuts (full) -->
+    <div class="sck sgrid">
+      <div class="srow"><span class="skey">Scroll</span><span class="sdsc">fine-tune multiplier</span></div>
+      <div class="srow"><span class="skey">Drag</span><span class="sdsc">gravity well distortion</span></div>
+      <div class="srow"><span class="skey">P</span><span class="sdsc">cycle preset patterns</span></div>
+      <div class="srow"><span class="skey">S</span><span class="sdsc">cycle shapes</span></div>
+      <div class="srow"><span class="skey">C</span><span class="sdsc">cycle color modes</span></div>
+      <div class="srow"><span class="skey">A</span><span class="sdsc">auto-animate multiplier</span></div>
+      <div class="srow"><span class="skey">M</span><span class="sdsc">toggle mirror mode</span></div>
+      <div class="srow"><span class="skey">Space</span><span class="sdsc">freeze / unfreeze</span></div>
+      <div class="srow"><span class="skey">+ / &minus;</span><span class="sdsc">adjust multiplier &pm;0.1</span></div>
+      <div class="srow"><span class="skey">N</span><span class="sdsc">cycle point count</span></div>
+      <div class="srow"><span class="skey">T</span><span class="sdsc">toggle thick lines</span></div>
+      <div class="srow"><span class="skey">G</span><span class="sdsc">toggle glow effect</span></div>
+      <div class="srow"><span class="skey">D</span><span class="sdsc">toggle dual layer</span></div>
+      <div class="srow"><span class="skey">R</span><span class="sdsc">record 6s loop</span></div>
+      <div class="srow"><span class="skey">E</span><span class="sdsc">save as PNG</span></div>
+      <div class="srow"><span class="skey">F</span><span class="sdsc">fullscreen</span></div>
+      <div class="srow cta">
+        <span class="skey">Esc</span>
+        <span class="cta-phrase"><span class="cta-word">close</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+
+    <!-- Touch shortcuts (full) -->
+    <div class="sct sgrid">
+      <div class="srow"><span class="skey">Tap</span><span class="sdsc">cycle preset patterns</span></div>
+      <div class="srow"><span class="skey">Swipe L/R</span><span class="sdsc">cycle presets</span></div>
+      <div class="srow"><span class="skey">Pinch</span><span class="sdsc">adjust multiplier</span></div>
+      <div class="srow"><span class="skey">2-finger tap</span><span class="sdsc">cycle color modes</span></div>
+      <div class="srow"><span class="skey">Long press</span><span class="sdsc">cycle shapes</span></div>
+      <div class="srow"><span class="skey">Double tap</span><span class="sdsc">gravity well</span></div>
+      <div class="srow cta">
+        <span class="skey">Tap</span>
+        <span class="cta-phrase"><span class="cta-word">close</span><span class="blink-dot"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ═══════════════════════════════════════════════
+   SPLASH & HELP
+   ═══════════════════════════════════════════════ */
+const splash=document.getElementById('splash');
+const helpOverlay=document.getElementById('help-overlay');
+const controlbar=document.getElementById('controlbar');
+const topbar=document.getElementById('topbar');
+let splashOpen=true;
+let helpOpen=false;
+
+function showUI(){
+  controlbar.classList.add('show');
+  topbar.classList.add('show');
+}
+function hideUI(){
+  controlbar.classList.remove('show');
+  topbar.classList.remove('show');
+}
+
+function dismissSplash(){if(!splashOpen)return;splashOpen=false;splash.classList.add('gone');showUI()}
+function dismissHelp(){if(!helpOpen)return;helpOpen=false;helpOverlay.classList.add('gone')}
+function showHelp(){if(helpOpen)return;helpOpen=true;helpOverlay.classList.remove('gone')}
+function toggleHelp(){if(helpOpen) dismissHelp(); else showHelp()}
+
+splash.addEventListener('click',dismissSplash);
+splash.addEventListener('touchstart',e=>{e.preventDefault();dismissSplash()},{passive:false});
+helpOverlay.addEventListener('click',dismissHelp);
+helpOverlay.addEventListener('touchstart',e=>{e.preventDefault();dismissHelp()},{passive:false});
+
+document.getElementById('btn-help').addEventListener('click',e=>{e.stopPropagation();toggleHelp()});
+
+/* ═══════════════════════════════════════════════
+   CANVAS & SIZING
+   ═══════════════════════════════════════════════ */
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const flashEl=document.getElementById('preset-flash');
+const recDot=document.getElementById('rec-dot');
+
+let W,H,cx,cy,radius;
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+  cx=W/2;cy=H/2;
+  radius=Math.min(W,H)*0.38;
+  rebuildPoints();
+}
+
+/* ═══════════════════════════════════════════════
+   CONSTANTS & STATE
+   ═══════════════════════════════════════════════ */
+const PHI=1.6180339887;
+const SQRT2=Math.SQRT2;
+
+const pointCounts=[120,240,360,480];
+let pointCountIndex=1;
+let numPoints=pointCounts[pointCountIndex];
+
+const shapeNames=['Circle','Triangle','Square','Pentagon','Hexagon','Octagon','Star'];
+const shapeSides=[0,3,4,5,6,8,-8];
+let shapeIndex=0;
+
+const presets=[
+  {name:'Cardioid',mult:2},
+  {name:'Nephroid',mult:3},
+  {name:'Trefoil',mult:4},
+  {name:'Star',mult:5},
+  {name:'Chaos',mult:SQRT2},
+  {name:'Golden',mult:PHI},
+  {name:'Fibonacci',mult:1.618033}
+];
+let presetIndex=0;
+
+const colorModes=['Rainbow','Mono','Temp','Neon','Pastel'];
+let colorModeIndex=0;
+
+let autoAnimate=false;
+let frozen=false;
+let mirrorMode=false;
+let thickLines=false;
+let glowMode=false;
+let dualLayer=false;
+
+let multiplier=2;
+let multiplierTarget=2;
+
+let targetPoints=[],currentPoints=[],previousPoints=[];
+let transitionProgress=1;
+
+let time=0;
+let lastTimestamp=0;
+let dt=0;
+
+let gravity={active:false,x:0,y:0};
+
+let particles=[];
+const MAX_PARTICLES=60;
+
+let recording=false;
+let recordFrames=[];
+let recordStart=0;
+const RECORD_DURATION=6;
+let playbackFrames=null;
+let playbackIndex=0;
+
+/* ═══════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════ */
+function lerp(a,b,t){return a+(b-a)*t}
+function easeInOutCubic(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+function clamp(v,lo,hi){return v<lo?lo:v>hi?hi:v}
+
+function flashName(name){
+  flashEl.textContent=name.toLowerCase();
+  flashEl.classList.add('vis');
+  clearTimeout(flashName._t);
+  flashName._t=setTimeout(()=>flashEl.classList.remove('vis'),1400);
+}
+
+/* ═══════════════════════════════════════════════
+   SHAPE GENERATION
+   ═══════════════════════════════════════════════ */
+function generatePoints(sides){
+  const pts=[];
+  const n=numPoints;
+  if(sides===0){
+    for(let i=0;i<n;i++){
+      const a=(i/n)*Math.PI*2-Math.PI/2;
+      pts.push({x:cx+Math.cos(a)*radius,y:cy+Math.sin(a)*radius});
+    }
+  } else if(sides<0){
+    const tips=Math.abs(sides);
+    const verts=[];
+    for(let i=0;i<tips*2;i++){
+      const a=(i/(tips*2))*Math.PI*2-Math.PI/2;
+      const r=i%2===0?radius:radius*0.42;
+      verts.push({x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r});
+    }
+    const totalSides=verts.length;
+    const pps=n/totalSides;
+    for(let s=0;s<totalSides;s++){
+      const a=verts[s],b=verts[(s+1)%totalSides];
+      for(let i=0;i<pps;i++){
+        const t=i/pps;
+        pts.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
+      }
+    }
+  } else {
+    const verts=[];
+    for(let i=0;i<sides;i++){
+      const a=(i/sides)*Math.PI*2-Math.PI/2;
+      verts.push({x:cx+Math.cos(a)*radius,y:cy+Math.sin(a)*radius});
+    }
+    const pps=n/sides;
+    for(let s=0;s<sides;s++){
+      const a=verts[s],b=verts[(s+1)%sides];
+      for(let i=0;i<pps;i++){
+        const t=i/pps;
+        pts.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
+      }
+    }
+  }
+  while(pts.length<n) pts.push(pts[pts.length-1]||{x:cx,y:cy});
+  pts.length=n;
+  return pts;
+}
+
+function rebuildPoints(){
+  targetPoints=generatePoints(shapeSides[shapeIndex]);
+  if(currentPoints.length!==numPoints){
+    currentPoints=targetPoints.map(p=>({x:p.x,y:p.y}));
+    previousPoints=currentPoints.map(p=>({x:p.x,y:p.y}));
+  }
+}
+
+function switchShape(idx){
+  shapeIndex=idx%shapeNames.length;
+  previousPoints=currentPoints.map(p=>({x:p.x,y:p.y}));
+  targetPoints=generatePoints(shapeSides[shapeIndex]);
+  transitionProgress=0;
+  flashName(shapeNames[shapeIndex]);
+  updateButtons();
+}
+
+function changePointCount(){
+  pointCountIndex=(pointCountIndex+1)%pointCounts.length;
+  numPoints=pointCounts[pointCountIndex];
+  currentPoints=[];
+  rebuildPoints();
+  flashName(numPoints+' points');
+}
+
+/* ═══════════════════════════════════════════════
+   COLOR ENGINE
+   ═══════════════════════════════════════════════ */
+function getColor(angle,length,maxLen,hueBase,layerAlpha){
+  const normLen=clamp(length/maxLen,0,1);
+  const baseAlpha=(0.08+0.25*(1-normLen))*layerAlpha;
+  const hue=(hueBase+(angle*180/Math.PI)+180)%360;
+
+  switch(colorModeIndex){
+    case 0: return `hsla(${hue},72%,62%,${baseAlpha})`;
+    case 1:{const l=55+Math.sin(angle)*15;return `hsla(220,8%,${l}%,${baseAlpha*1.4})`}
+    case 2:{const h=240-normLen*240;return `hsla(${h},75%,55%,${baseAlpha*1.1})`}
+    case 3:{const h=hue;return `hsla(${h},100%,68%,${baseAlpha*1.3})`}
+    case 4:{return `hsla(${hue},55%,78%,${baseAlpha*1.5})`}
+    default: return `hsla(${hue},72%,62%,${baseAlpha})`;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   PARTICLES
+   ═══════════════════════════════════════════════ */
+function initParticles(){
+  particles=[];
+  for(let i=0;i<MAX_PARTICLES;i++) particles.push(spawnParticle());
+}
+
+function spawnParticle(){
+  const a=Math.random()*Math.PI*2;
+  const r=radius*(0.3+Math.random()*0.7);
+  return{
+    x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r,
+    vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,
+    life:Math.random(),decay:0.001+Math.random()*0.003,
+    size:0.5+Math.random()*1.5
+  };
+}
+
+function updateParticles(){
+  for(let i=0;i<particles.length;i++){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;
+    if(p.life<=0) particles[i]=spawnParticle();
+  }
+}
+
+function drawParticles(hueBase){
+  for(const p of particles){
+    const alpha=p.life*0.15;
+    const hue=(hueBase+p.x*0.1)%360;
+    ctx.fillStyle=`hsla(${hue},60%,70%,${alpha})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   RECORDING
+   ═══════════════════════════════════════════════ */
+function startRecording(){
+  recording=true;recordFrames=[];recordStart=time;playbackFrames=null;
+  recDot.classList.add('active');flashName('recording');
+}
+function stopRecording(){
+  recording=false;recDot.classList.remove('active');
+  if(recordFrames.length>10){playbackFrames=recordFrames.slice();playbackIndex=0;flashName('looping')}
+  recordFrames=[];
+}
+
+/* ═══════════════════════════════════════════════
+   SAVE AS PNG
+   ═══════════════════════════════════════════════ */
+function saveAsPNG(){
+  const link=document.createElement('a');
+  link.download='string-art-'+Date.now()+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+  flashName('saved');
+}
+
+/* ═══════════════════════════════════════════════
+   DRAW STRING ART PATTERN
+   ═══════════════════════════════════════════════ */
+function drawPattern(pts,mult,baseWidth,hueBase,layerAlpha,maxLen){
+  const n=pts.length;
+  for(let i=0;i<n;i++){
+    const j=Math.floor((i*mult)%n);
+    if(j<0||j>=n) continue;
+    const p1=pts[i],p2=pts[j];
+    if(!p1||!p2) continue;
+
+    const dx=p2.x-p1.x,dy=p2.y-p1.y;
+    const length=Math.sqrt(dx*dx+dy*dy);
+    const angle=Math.atan2(dy,dx);
+    const normLen=clamp(length/maxLen,0,1);
+
+    let lw=baseWidth;
+    if(thickLines) lw=baseWidth*(0.3+2.5*(1-normLen));
+    ctx.lineWidth=lw;
+
+    if(glowMode){
+      ctx.shadowColor=getColor(angle,length,maxLen,hueBase,1);
+      ctx.shadowBlur=6+4*(1-normLen);
+    }
+
+    ctx.strokeStyle=getColor(angle,length,maxLen,hueBase,layerAlpha);
+    ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke();
+  }
+  if(glowMode){ctx.shadowColor='transparent';ctx.shadowBlur=0}
+}
+
+/* ═══════════════════════════════════════════════
+   BUTTON STATE
+   ═══════════════════════════════════════════════ */
+const btnPreset=document.getElementById('btn-preset');
+const btnShape=document.getElementById('btn-shape');
+const btnColor=document.getElementById('btn-color');
+const btnMirror=document.getElementById('btn-mirror');
+const btnAnimate=document.getElementById('btn-animate');
+
+function updateButtons(){
+  btnPreset.innerHTML=presets[presetIndex].name+'<span class="kbk">P</span>';
+  btnShape.innerHTML=shapeNames[shapeIndex]+'<span class="kbk">S</span>';
+  btnColor.innerHTML=colorModes[colorModeIndex]+'<span class="kbk">C</span>';
+  btnMirror.className='pb'+(mirrorMode?' on':'');
+  btnMirror.innerHTML='Mirror<span class="kbk">M</span>';
+  btnAnimate.className='pb'+(autoAnimate?' on':'');
+  btnAnimate.innerHTML='Animate<span class="kbk">A</span>';
+}
+
+btnPreset.addEventListener('click',e=>{
+  e.stopPropagation();
+  presetIndex=(presetIndex+1)%presets.length;
+  const pr=presets[presetIndex];
+  multiplierTarget=pr.mult;
+  flashName(pr.name);
+  updateButtons();
+});
+btnShape.addEventListener('click',e=>{
+  e.stopPropagation();
+  switchShape(shapeIndex+1);
+});
+btnColor.addEventListener('click',e=>{
+  e.stopPropagation();
+  colorModeIndex=(colorModeIndex+1)%colorModes.length;
+  flashName(colorModes[colorModeIndex]);
+  updateButtons();
+});
+btnMirror.addEventListener('click',e=>{
+  e.stopPropagation();
+  mirrorMode=!mirrorMode;
+  flashName(mirrorMode?'mirror on':'mirror off');
+  updateButtons();
+});
+btnAnimate.addEventListener('click',e=>{
+  e.stopPropagation();
+  autoAnimate=!autoAnimate;
+  flashName(autoAnimate?'auto on':'auto off');
+  updateButtons();
+});
+
+// Save button
+document.getElementById('btn-save').addEventListener('click',e=>{e.stopPropagation();saveAsPNG()});
+
+/* ═══════════════════════════════════════════════
+   MAIN FRAME
+   ═══════════════════════════════════════════════ */
+function frame(timestamp){
+  requestAnimationFrame(frame);
+  if(!lastTimestamp) lastTimestamp=timestamp;
+  dt=(timestamp-lastTimestamp)/1000;
+  lastTimestamp=timestamp;
+  if(dt>0.1) dt=0.016;
+
+  if(!frozen) time+=dt;
+
+  if(autoAnimate&&!frozen) multiplierTarget+=dt*0.15;
+
+  multiplier=lerp(multiplier,multiplierTarget,Math.min(1,dt*8));
+
+  if(transitionProgress<1){
+    transitionProgress=Math.min(1,transitionProgress+dt*1.2);
+    const ease=easeInOutCubic(transitionProgress);
+    const n=Math.min(currentPoints.length,previousPoints.length,targetPoints.length);
+    for(let i=0;i<n;i++){
+      if(previousPoints[i]&&targetPoints[i]){
+        currentPoints[i]={
+          x:lerp(previousPoints[i].x,targetPoints[i].x,ease),
+          y:lerp(previousPoints[i].y,targetPoints[i].y,ease)
+        };
+      }
+    }
+  } else {
+    for(let i=0;i<numPoints;i++){
+      if(targetPoints[i]) currentPoints[i]={x:targetPoints[i].x,y:targetPoints[i].y};
+    }
+  }
+
+  const displayPoints=[];
+  for(let i=0;i<numPoints;i++){
+    const p=currentPoints[i];
+    if(!p){displayPoints.push({x:cx,y:cy});continue}
+    if(gravity.active){
+      const dx=p.x-gravity.x,dy=p.y-gravity.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      const influence=Math.max(0,1-dist/(radius*0.8));
+      const pull=influence*influence*60;
+      const a=Math.atan2(dy,dx);
+      displayPoints.push({x:p.x-Math.cos(a)*pull,y:p.y-Math.sin(a)*pull});
+    } else {
+      displayPoints.push({x:p.x,y:p.y});
+    }
+  }
+
+  const hueBase=(time*18)%360;
+  const maxLen=radius*2;
+
+  const bgHue=(hueBase*0.3)%360;
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.7);
+  grad.addColorStop(0,`hsla(${bgHue},12%,5%,0.12)`);
+  grad.addColorStop(1,'rgba(8,8,10,0.12)');
+  ctx.fillStyle=grad;
+  ctx.fillRect(0,0,W,H);
+
+  if(playbackFrames&&!recording){
+    const pf=playbackFrames[playbackIndex%playbackFrames.length];
+    if(pf){
+      const img=new Image();
+      img.onload=()=>{ctx.drawImage(img,0,0)};
+      img.src=pf;
+    }
+    playbackIndex++;
+    return;
+  }
+
+  if(!frozen) updateParticles();
+
+  drawPattern(displayPoints,multiplier,0.8,hueBase,1,maxLen);
+
+  if(mirrorMode){
+    const revMult=numPoints-multiplier;
+    drawPattern(displayPoints,revMult,0.6,hueBase+180,0.6,maxLen);
+  }
+
+  if(dualLayer){
+    const dualMult=multiplier*PHI;
+    drawPattern(displayPoints,dualMult,0.5,hueBase+120,0.45,maxLen);
+  }
+
+  drawParticles(hueBase);
+
+  ctx.fillStyle='rgba(255,255,255,0.06)';
+  for(let i=0;i<numPoints;i+=4){
+    const p=displayPoints[i];
+    if(!p) continue;
+    ctx.beginPath();ctx.arc(p.x,p.y,1,0,Math.PI*2);ctx.fill();
+  }
+
+  if(recording){
+    if(time-recordStart>=RECORD_DURATION) stopRecording();
+    else{try{recordFrames.push(canvas.toDataURL('image/webp',0.6))}catch(e){}}
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   INPUT: KEYBOARD
+   ═══════════════════════════════════════════════ */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(helpOpen){dismissHelp();return}
+    if(splashOpen){dismissSplash();return}
+    return;
+  }
+  if(splashOpen){
+    dismissSplash();
+    if(e.key==='Enter') return;
+  }
+  if(helpOpen){
+    dismissHelp();
+    return;
+  }
+  const key=e.key;
+
+  if(key==='p'||key==='P'){
+    presetIndex=(presetIndex+1)%presets.length;
+    const pr=presets[presetIndex];
+    multiplierTarget=pr.mult;
+    flashName(pr.name);
+    updateButtons();
+    return;
+  }
+  if(key==='a'||key==='A'){
+    autoAnimate=!autoAnimate;
+    flashName(autoAnimate?'auto on':'auto off');
+    updateButtons();
+    return;
+  }
+  if(key==='+'||key==='='){multiplierTarget+=0.1;return}
+  if(key==='-'||key==='_'){multiplierTarget=Math.max(0.1,multiplierTarget-0.1);return}
+  if(key==='n'||key==='N'){changePointCount();return}
+  if(key==='s'||key==='S'){switchShape(shapeIndex+1);return}
+  if(key==='c'||key==='C'){
+    colorModeIndex=(colorModeIndex+1)%colorModes.length;
+    flashName(colorModes[colorModeIndex]);
+    updateButtons();
+    return;
+  }
+  if(key==='t'||key==='T'){thickLines=!thickLines;flashName(thickLines?'thick on':'thick off');return}
+  if(key==='g'||key==='G'){glowMode=!glowMode;flashName(glowMode?'glow on':'glow off');return}
+  if(key==='m'||key==='M'){
+    mirrorMode=!mirrorMode;
+    flashName(mirrorMode?'mirror on':'mirror off');
+    updateButtons();
+    return;
+  }
+  if(key==='d'||key==='D'){dualLayer=!dualLayer;flashName(dualLayer?'dual on':'dual off');return}
+  if(key==='r'||key==='R'){
+    if(!recording){playbackFrames=null;startRecording()} else stopRecording();
+    return;
+  }
+  if(key==='e'||key==='E'){saveAsPNG();return}
+  if(key===' '||key==='Spacebar'){
+    e.preventDefault();
+    frozen=!frozen;
+    flashName(frozen?'frozen':'unfrozen');
+    return;
+  }
+  if(key==='f'||key==='F'){
+    if(!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+    else document.exitFullscreen().catch(()=>{});
+    return;
+  }
+  if(key==='9'){toggleHelp();return}
+});
+
+/* ═══════════════════════════════════════════════
+   INPUT: MOUSE
+   ═══════════════════════════════════════════════ */
+let mouseDown=false;
+
+canvas.addEventListener('mousedown',e=>{
+  if(splashOpen) return;
+  mouseDown=true;
+  gravity.active=true;
+  gravity.x=e.clientX;gravity.y=e.clientY;
+});
+window.addEventListener('mousemove',e=>{
+  if(mouseDown){gravity.x=e.clientX;gravity.y=e.clientY}
+});
+window.addEventListener('mouseup',()=>{mouseDown=false;gravity.active=false});
+
+window.addEventListener('wheel',e=>{
+  if(splashOpen) return;
+  e.preventDefault();
+  const delta=e.deltaY>0?-0.05:0.05;
+  multiplierTarget=Math.max(0.1,multiplierTarget+delta);
+},{passive:false});
+
+/* ═══════════════════════════════════════════════
+   INPUT: TOUCH
+   ═══════════════════════════════════════════════ */
+let touchStart={x:0,y:0,time:0};
+let touchMoved=false;
+let touchTimer=0;
+let pinchStartDist=0;
+let pinchStartMult=0;
+let doubleTapTime=0;
+
+function getTouchDist(e){
+  if(e.touches.length<2) return 0;
+  const dx=e.touches[0].clientX-e.touches[1].clientX;
+  const dy=e.touches[0].clientY-e.touches[1].clientY;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+
+canvas.addEventListener('touchstart',e=>{
+  if(splashOpen){dismissSplash();e.preventDefault();return}
+  e.preventDefault();
+  const t=e.touches[0];
+  touchMoved=false;
+
+  if(e.touches.length===2){
+    colorModeIndex=(colorModeIndex+1)%colorModes.length;
+    flashName(colorModes[colorModeIndex]);
+    updateButtons();
+    pinchStartDist=getTouchDist(e);
+    pinchStartMult=multiplierTarget;
+    return;
+  }
+
+  const now=Date.now();
+  if(now-doubleTapTime<350){
+    gravity.active=true;gravity.x=t.clientX;gravity.y=t.clientY;
+    setTimeout(()=>{gravity.active=false},800);
+    doubleTapTime=0;
+    return;
+  }
+  doubleTapTime=now;
+
+  touchStart={x:t.clientX,y:t.clientY,time:now};
+
+  touchTimer=setTimeout(()=>{
+    if(!touchMoved) switchShape(shapeIndex+1);
+    touchTimer=0;
+  },500);
+},{passive:false});
+
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  const t=e.touches[0];
+  if(Math.abs(t.clientX-touchStart.x)>12||Math.abs(t.clientY-touchStart.y)>12) touchMoved=true;
+  if(e.touches.length>=2){
+    const dist=getTouchDist(e);
+    if(pinchStartDist>0) multiplierTarget=Math.max(0.1,pinchStartMult*(dist/pinchStartDist));
+  }
+},{passive:false});
+
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();
+  if(touchTimer){
+    clearTimeout(touchTimer);touchTimer=0;
+    if(!touchMoved){
+      presetIndex=(presetIndex+1)%presets.length;
+      const pr=presets[presetIndex];
+      multiplierTarget=pr.mult;
+      flashName(pr.name);
+      updateButtons();
+    }
+  }
+  if(touchMoved&&e.changedTouches.length){
+    const t=e.changedTouches[0];
+    const dx=t.clientX-touchStart.x;
+    const adx=Math.abs(dx);
+    if(adx>70){
+      if(dx>0) presetIndex=(presetIndex+1)%presets.length;
+      else presetIndex=(presetIndex-1+presets.length)%presets.length;
+      const pr=presets[presetIndex];
+      multiplierTarget=pr.mult;
+      flashName(pr.name);
+      updateButtons();
+    }
+  }
+  pinchStartDist=0;
+},{passive:false});
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+window.addEventListener('resize',resize);
+resize();
+initParticles();
+ctx.fillStyle='#0a0a0a';ctx.fillRect(0,0,W,H);
+multiplierTarget=presets[0].mult;
+multiplier=multiplierTarget;
+updateButtons();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>kaleidoscopic</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS (light) ──────────────────────────── */
+:root{
+  --bg:   #f5f5f7;
+  --ink:  #1d1d1f;
+  --mid:  rgba(29,29,31,.58);
+  --dim:  rgba(29,29,31,.36);
+  --bd:   rgba(29,29,31,.11);
+  --pad:  clamp(10px,4.2vw,54px);
+  --tbh:  48px;
+  --bbh:  58px;
+  --ovh:  106px;
+  --font: 'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;
+  /* overlay theme tokens */
+  --ov-bg:rgba(245,245,247,.97);--ov-text:#1d1d1f;--ov-dim:rgba(29,29,31,.36);
+  --ov-mid:rgba(29,29,31,.55);--ov-strong:rgba(29,29,31,.75);--ov-border:rgba(29,29,31,.1);
+  --ov-row-bg:rgba(29,29,31,.015);--ov-row-border:rgba(29,29,31,.08);
+  --ov-key-bg:rgba(29,29,31,.06);--ov-key-text:rgba(29,29,31,.5);
+  --ov-grid-bg:rgba(245,245,247,.5);--ov-dot:#1d1d1f;
+}
+[data-theme="terminal"]{
+  --ov-bg:rgba(10,10,10,.97);--ov-text:#00ff41;--ov-dim:rgba(0,255,65,.36);
+  --ov-mid:rgba(0,255,65,.55);--ov-strong:rgba(0,255,65,.75);--ov-border:rgba(0,255,65,.15);
+  --ov-row-bg:rgba(0,255,65,.02);--ov-row-border:rgba(0,255,65,.1);
+  --ov-key-bg:rgba(0,255,65,.08);--ov-key-text:rgba(0,255,65,.55);
+  --ov-grid-bg:rgba(10,10,10,.5);--ov-dot:#00ff41;
+}
+[data-theme="brutalist"]{
+  --ov-bg:rgba(255,255,255,.97);--ov-text:#000;--ov-dim:rgba(0,0,0,.4);
+  --ov-mid:rgba(0,0,0,.6);--ov-strong:#000;--ov-border:rgba(0,0,0,.15);
+  --ov-row-bg:rgba(0,0,0,.02);--ov-row-border:rgba(0,0,0,.1);
+  --ov-key-bg:rgba(0,0,0,.08);--ov-key-text:rgba(0,0,0,.55);
+  --ov-grid-bg:rgba(255,255,255,.5);--ov-dot:#000;
+}
+[data-theme="editorial"]{
+  --ov-bg:rgba(250,249,246,.97);--ov-text:#1a1a1a;--ov-dim:rgba(26,26,26,.36);
+  --ov-mid:rgba(26,26,26,.55);--ov-strong:rgba(26,26,26,.75);--ov-border:rgba(26,26,26,.1);
+  --ov-row-bg:rgba(26,26,26,.015);--ov-row-border:rgba(26,26,26,.08);
+  --ov-key-bg:rgba(26,26,26,.06);--ov-key-text:rgba(26,26,26,.5);
+  --ov-grid-bg:rgba(250,249,246,.5);--ov-dot:#1a1a1a;
+}
+[data-theme="zen"]{
+  --ov-bg:rgba(248,246,243,.97);--ov-text:#2d2926;--ov-dim:rgba(45,41,38,.36);
+  --ov-mid:rgba(45,41,38,.55);--ov-strong:rgba(45,41,38,.75);--ov-border:rgba(45,41,38,.1);
+  --ov-row-bg:rgba(45,41,38,.015);--ov-row-border:rgba(45,41,38,.08);
+  --ov-key-bg:rgba(45,41,38,.06);--ov-key-text:rgba(45,41,38,.5);
+  --ov-grid-bg:rgba(248,246,243,.5);--ov-dot:#2d2926;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{height:100%;height:100dvh}
+body{
+  height:100%;height:100dvh;
+  overflow:hidden;overflow-x:auto;
+  background:var(--bg);font-family:var(--font);cursor:none;
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 var(--pad);min-width:340px;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;
+}
+
+/* ─── MAIN COLUMN ─────────────────────────────── */
+#main{
+  display:flex;flex-direction:column;
+  width:100%;height:100%;
+  max-width:min(100%, calc((100dvh - var(--ovh)) * 16 / 9));
+  min-width:320px;
+}
+
+/* ─── TOP BAR ─────────────────────────────────── */
+#topbar{
+  height:var(--tbh);flex-shrink:0;
+  display:flex;align-items:center;
+}
+#title{
+  font-size:clamp(.6rem,.88vw,.8rem);font-weight:300;
+  letter-spacing:.3em;color:var(--ink);flex-shrink:0;
+}
+#tagline{
+  flex:1;text-align:center;
+  font-size:clamp(.48rem,.68vw,.62rem);
+  font-weight:200;letter-spacing:.16em;color:var(--dim);padding:0 10px;
+}
+#topright{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.topbtn{
+  font-family:var(--font);font-size:clamp(.46rem,.65vw,.56rem);
+  font-weight:400;letter-spacing:.13em;padding:6px 13px;border-radius:100px;
+  border:1px solid var(--bd);background:transparent;color:var(--mid);
+  cursor:pointer;transition:border-color .2s,color .2s,box-shadow .2s;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.topbtn:hover{border-color:rgba(29,29,31,.28);color:var(--ink)}
+.kbk{font-size:.38rem;opacity:.28;font-weight:300}
+#btnSave.rec{
+  border-color:rgba(200,40,40,.45);color:rgba(190,35,35,.9);
+  animation:rec-pulse 1.4s ease-in-out infinite;
+}
+@keyframes rec-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(200,40,40,0)}
+  50%{box-shadow:0 0 0 4px rgba(200,40,40,.1)}
+}
+
+/* ─── STAGE ───────────────────────────────────── */
+#stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#cwrap{
+  position:relative;aspect-ratio:16/9;width:100%;
+  max-height:100%;border-radius:5px;overflow:hidden;
+  box-shadow:0 1px 0 rgba(29,29,31,.08),0 4px 24px rgba(29,29,31,.07);
+}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:none}
+
+/* Recording HUD */
+#rec-hud{position:absolute;inset:0;pointer-events:none;display:none}
+#rec-hud.vis{display:block}
+#rec-track{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(29,29,31,.08)}
+#rec-fill{height:100%;width:0%;background:rgba(200,40,40,.65)}
+#rec-lbl{
+  position:absolute;bottom:9px;right:12px;
+  font-size:.5rem;font-weight:300;letter-spacing:.12em;
+  color:rgba(190,35,35,.6);
+}
+#rec-path{
+  position:absolute;top:9px;left:12px;
+  font-size:.46rem;font-weight:200;letter-spacing:.14em;
+  color:rgba(29,29,31,.22);
+}
+
+/* ─── BOTTOM BAR ──────────────────────────────── */
+#bottombar{
+  height:var(--bbh);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+#pill{
+  display:flex;align-items:stretch;
+  border:1px solid var(--bd);border-radius:100px;
+  overflow-x:auto;overflow-y:hidden;
+  background:rgba(29,29,31,.04);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  scrollbar-width:none;max-width:100%;
+}
+#pill::-webkit-scrollbar{display:none}
+.pb{
+  font-family:var(--font);font-size:clamp(.4rem,.6vw,.55rem);
+  font-weight:400;letter-spacing:.09em;
+  padding:8px clamp(7px,1vw,14px);
+  border:none;border-right:1px solid var(--bd);
+  background:transparent;color:var(--dim);cursor:pointer;
+  transition:color .18s,background .18s;
+  white-space:nowrap;flex-shrink:0;
+  display:flex;align-items:center;gap:3px;position:relative;
+}
+.pb:last-child{border-right:none}
+.pb:hover{color:rgba(29,29,31,.68);background:rgba(29,29,31,.04)}
+.pb.on{color:var(--ink);background:rgba(29,29,31,.07)}
+.pb.on::after{
+  content:'';position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  width:3px;height:3px;border-radius:50%;background:var(--ink);opacity:.4;
+}
+.pb .psub{font-size:.36rem;opacity:.26;font-weight:200}
+
+/* 2 rows of 4 */
+@media(max-width:680px) and (min-width:381px){
+  #pill{display:grid;grid-template-columns:repeat(4,1fr);border-radius:10px}
+  .pb{border-right:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+  .pb:nth-child(4n){border-right:none}
+  .pb:nth-child(n+5){border-bottom:none}
+}
+/* 4 rows of 2 */
+@media(max-width:380px){
+  #pill{display:grid;grid-template-columns:repeat(2,1fr);border-radius:9px}
+  .pb{border-right:1px solid var(--bd);border-bottom:1px solid var(--bd)}
+  .pb:nth-child(2n){border-right:none}
+  .pb:nth-child(n+7){border-bottom:none}
+}
+
+/* ─── MOBILE 3-ROW TOPBAR ─────────────────────── */
+@media(max-width:540px){
+  body{padding:0 clamp(8px,3vw,14px)}
+  #topbar{height:auto;flex-direction:column;align-items:center;padding:8px 0 5px;gap:4px}
+  #tagline{flex:none;padding:0}
+  :root{--tbh:90px;--ovh:148px}
+}
+
+/* ─── OVERLAYS ────────────────────────────────── */
+.ov{
+  position:fixed;inset:0;z-index:40;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--ov-bg);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  transition:opacity .5s cubic-bezier(.4,0,.2,1);
+  padding:20px;overflow-y:auto;
+}
+.ov.gone{opacity:0;pointer-events:none}
+
+/* ─── DROP ZONE ───────────────────────────────── */
+#dz .dring{
+  width:clamp(130px,16vw,175px);height:clamp(130px,16vw,175px);
+  border-radius:50%;border:1px solid var(--ov-border);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  position:relative;margin-bottom:20px;transition:border-color .3s;
+}
+#dz.drag .dring{border-color:var(--ov-mid)}
+.dring::before{
+  content:'';position:absolute;inset:-13px;border-radius:50%;
+  border:1px dashed var(--ov-border);
+  animation:spin 30s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dico{font-size:1.3rem;opacity:.16;color:var(--ov-text);margin-bottom:9px}
+.dtit{font-size:clamp(.56rem,.84vw,.68rem);font-weight:300;letter-spacing:.22em;color:var(--ov-mid)}
+.dsub{font-size:clamp(.48rem,.7vw,.56rem);font-weight:200;letter-spacing:.11em;color:var(--ov-dim);margin-top:4px}
+
+/* ─── SPLASH ──────────────────────────────────── */
+#spl-inner{
+  max-width:490px;width:100%;
+  display:flex;flex-direction:column;align-items:center;
+}
+.spl-title{
+  font-size:clamp(.92rem,3vw,1.5rem);font-weight:200;
+  letter-spacing:.3em;color:var(--ov-text);margin-bottom:7px;text-align:center;
+}
+.spl-desc{
+  font-size:clamp(.54rem,.82vw,.66rem);font-weight:300;
+  letter-spacing:.1em;color:var(--ov-dim);line-height:2;
+  text-align:center;margin-bottom:24px;max-width:360px;
+}
+.spl-desc em{color:var(--ov-mid);font-style:normal}
+
+.sck{display:block;width:100%;margin-bottom:0}
+.sct{display:none;width:100%;margin-bottom:0}
+@media(hover:none) and (pointer:coarse){.sck{display:none}.sct{display:block}}
+
+/* ─── SHORTCUT GRID ───────────────────────────── */
+.sgrid{
+  border:1px solid var(--ov-border);border-radius:10px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;width:100%;
+  background:var(--ov-grid-bg);
+}
+@media(max-width:440px){.sgrid{grid-template-columns:1fr}}
+
+.srow{
+  display:flex;align-items:center;
+  padding:9px 12px;gap:9px;
+  background:var(--ov-row-bg);
+  border-right:1px solid var(--ov-row-border);
+  border-bottom:1px solid var(--ov-row-border);
+}
+.srow:nth-child(2n){border-right:none}
+.srow:nth-last-child(-n+2){border-bottom:none}
+
+/* CTA row — highlighted, no sico */
+.srow.cta{
+  background:var(--ov-row-bg);
+  border-bottom:none;
+  padding-left:12px;  /* aligns with cells above */
+}
+.srow.cta .skey{
+  color:var(--ov-strong);
+  border-color:var(--ov-mid);
+  background:var(--ov-key-bg);
+  letter-spacing:.06em;
+}
+
+/* CTA phrase */
+.cta-phrase{
+  display:flex;align-items:center;gap:7px;flex-wrap:nowrap;
+}
+.cta-word{
+  font-size:.52rem;font-weight:300;letter-spacing:.07em;
+  color:var(--ov-mid);white-space:nowrap;
+}
+
+/* Blinking dot */
+.blink-dot{
+  display:inline-block;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--ov-dot);opacity:.45;
+  flex-shrink:0;margin-left:4px;
+  animation:blink 1.4s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:.15}50%{opacity:.85}}
+
+/* 1-col overrides */
+@media(max-width:440px){
+  .srow{border-right:none}
+  .srow:nth-last-child(-n+2){border-bottom:1px solid var(--ov-row-border)}
+  .srow:last-child{border-bottom:none}
+  .srow.cta{border-bottom:none}
+}
+
+.sico{width:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--ov-dim)}
+
+/* Left-column keys — natural width */
+.skey{
+  font-size:.5rem;font-weight:400;letter-spacing:.06em;
+  color:var(--ov-key-text);background:var(--ov-key-bg);
+  border:1px solid var(--ov-border);border-radius:4px;
+  padding:2px 7px;white-space:nowrap;flex-shrink:0;
+  min-width:44px;text-align:center;
+}
+/* Right-column keys — equal fixed width */
+.skey-r{
+  font-size:.5rem;font-weight:400;letter-spacing:.06em;
+  color:var(--ov-key-text);background:var(--ov-key-bg);
+  border:1px solid var(--ov-border);border-radius:4px;
+  padding:2px 7px;white-space:nowrap;flex-shrink:0;
+  width:76px;text-align:center;
+}
+.sdsc{font-size:.52rem;font-weight:300;letter-spacing:.05em;color:var(--ov-dim)}
+
+/* ─── ANIMATED SHORTCUT ICONS ─────────────────── */
+@keyframes c1{0%,60%,100%{transform:scale(1)}22%{transform:scale(.72)}}
+@keyframes c2{0%,75%,100%{transform:scale(1)}14%{transform:scale(.72)}28%{transform:scale(1)}46%{transform:scale(.72)}60%{transform:scale(1)}}
+@keyframes mv{0%,100%{transform:translate(0,0)}50%{transform:translate(2px,-1.5px)}}
+@keyframes sc{0%,100%{transform:translateY(0)}38%{transform:translateY(-2.5px)}68%{transform:translateY(2.5px)}}
+@keyframes tp{0%,78%,100%{transform:scale(1);opacity:.36}32%{transform:scale(.7);opacity:.9}}
+@keyframes dt{0%,82%,100%{transform:scale(1);opacity:.36}13%{transform:scale(.7);opacity:.9}26%{transform:scale(1);opacity:.36}44%{transform:scale(.7);opacity:.9}58%{transform:scale(1);opacity:.36}}
+@keyframes pn{0%,100%{letter-spacing:.18em;opacity:.36}50%{letter-spacing:-.14em;opacity:.8}}
+.a-c1{animation:c1 2.8s ease-in-out infinite}
+.a-c2{animation:c2 3.2s ease-in-out infinite}
+.a-mv{animation:mv 2.4s ease-in-out infinite}
+.a-sc{animation:sc 2s ease-in-out infinite}
+.a-tp{animation:tp 2.6s ease-in-out infinite}
+.a-dt{animation:dt 3s ease-in-out infinite}
+.a-pn{animation:pn 2.4s ease-in-out infinite;display:inline-block}
+
+/* ─── CURSOR ──────────────────────────────────── */
+#dot{
+  position:fixed;width:4px;height:4px;border-radius:50%;
+  background:rgba(29,29,31,.55);pointer-events:none;
+  transform:translate(-50%,-50%);z-index:200;
+}
+@media(hover:none) and (pointer:coarse){
+  body{cursor:auto}#dot{display:none}.kbk{display:none}
+}
+@media(max-width:600px){.pb .kbk{display:none}#tagline{display:none}}
+</style>
+<script>
+(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)})();
+</script>
+
+    <link rel="canonical" href="https://toys.iamkesava.com/kaleidoscopic/">
+    <meta property="og:url" content="https://toys.iamkesava.com/kaleidoscopic/">
+    <meta property="og:title" content="Kaleidoscopic, by Kesava">
+    <meta property="og:description" content="Upload any image and watch it fold into living geometry. 8 symmetry patterns, real-time WebGL rendering, video recording.">
+    <meta property="og:image" content="https://toys.iamkesava.com/kaleidoscopic/og.svg">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Kaleidoscopic, by Kesava">
+    <meta name="twitter:description" content="Upload any image and watch it fold into living geometry. 8 symmetry patterns, real-time WebGL rendering, video recording.">
+    <meta name="twitter:image" content="https://toys.iamkesava.com/kaleidoscopic/og.svg">
+    <meta name="author" content="Kesava">
+    <meta name="description" content="Upload any image and watch it fold into living geometry. 8 symmetry patterns, real-time WebGL rendering, video recording.">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CreativeWork","@id":"https://toys.iamkesava.com/kaleidoscopic/","name":"Kaleidoscopic","description":"Upload any image and watch it fold into living geometry. 8 symmetry patterns, real-time WebGL rendering, video recording.","url":"https://toys.iamkesava.com/kaleidoscopic/","keywords":"WebGL, kaleidoscope, image","author":{"@type":"Person","name":"Kesava","url":"https://iamkesava.com"},"publisher":{"@type":"Organization","name":"little toys","url":"https://toys.iamkesava.com"},"codeRepository":"https://github.com/k3sava/kaleidoscopic","license":"https://opensource.org/licenses/MIT"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"iamkesava","item":"https://iamkesava.com"},{"@type":"ListItem","position":2,"name":"toys","item":"https://toys.iamkesava.com/"},{"@type":"ListItem","position":3,"name":"Kaleidoscopic","item":"https://toys.iamkesava.com/kaleidoscopic/"}]}]}</script>
+  
+  
+    <link rel="stylesheet" href="/_chrome/chrome.css">
+    
+    <script src="/_chrome/theme.js" defer></script>
+    <script src="/_chrome/splash.js" defer></script>
+  
+  </head>
+<body>
+<div class="theme-switcher-container">
+  <button class="theme-switcher-pill" type="button" aria-label="Cycle theme (T)" title="Cycle theme (T)">
+    <span class="theme-switcher-pill-icon">○</span>
+  </button>
+</div>
+<nav class="kami-breadcrumb-fixed" aria-label="Breadcrumb">
+  <a href="https://iamkesava.com">home</a><span class="sep">·</span>
+  <a href="https://toys.iamkesava.com/">toys</a><span class="sep">·</span><span class="current">Kaleidoscopic</span>
+</nav>
+<div class="kami-shortcut-hint" aria-hidden="true">
+  <kbd>T</kbd> theme
+</div>
+<div class="kami-splash" role="status" aria-live="polite">
+  <h1 class="kami-splash-name">Kaleidoscopic</h1>
+  <p class="kami-splash-tag">Upload any image and watch it fold into living geometry. 8 symmetry patterns, real-time We</p>
+  <span class="kami-splash-dot"></span>
+  <div class="kami-splash-skip">press <kbd>esc</kbd> or click to begin</div>
+</div>
+<footer class="kami-footer-fixed" role="contentinfo">
+  <a href="https://apps.iamkesava.com/">apps</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://tools.iamkesava.com/">tools</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://toys.iamkesava.com/" aria-current="page" style="font-weight:600;color:var(--kami-text);">toys</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://codex.iamkesava.com/">codex</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://iamkesava.com" rel="author">kesava</a>
+  <span class="dot" aria-hidden="true">·</span>
+  <a href="https://github.com/k3sava/kaleidoscopic" rel="noopener">github</a>
+</footer>
+
+
+<div id="main">
+  <div id="topbar">
+    <div id="title">kaleidoscopic</div>
+    <div id="tagline">eight symmetries, infinite forms</div>
+    <div id="topright">
+      <button class="topbtn" id="btnHelp">?&thinsp;<span class="kbk">[9]</span></button>
+      <button class="topbtn" id="btnSave">save&thinsp;<span class="kbk">[`]</span></button>
+      <button class="topbtn" id="btnNew">new&thinsp;<span class="kbk">[0]</span></button>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="cwrap">
+      <canvas id="c"></canvas>
+      <div id="rec-hud">
+        <div id="rec-track"><div id="rec-fill"></div></div>
+        <div id="rec-lbl">● 0:15</div>
+        <div id="rec-path"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottombar"><div id="pill"></div></div>
+</div>
+
+<!-- DROP -->
+<div class="ov gone" id="dz">
+  <div class="dring"><div class="dico">◈</div></div>
+  <div class="dtit">drop an image</div>
+  <div class="dsub">or tap to browse</div>
+</div>
+
+<!-- SPLASH -->
+<div class="ov" id="spl">
+  <div id="spl-inner">
+    <div class="spl-title">kaleidoscopic</div>
+    <div class="spl-desc">
+      a living symmetry explorer<br>
+      <em>drop any image to sculpt kaleidoscopic forms</em>
+    </div>
+
+    <!-- ── KEYBOARD (pointer devices) ── -->
+    <div class="sck">
+      <div class="sgrid">
+
+        <div class="srow">
+          <div class="sico"><svg class="a-mv" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1L5.1 3.8H6.2V6.2H3.8V5.1L1 7L3.8 8.9V7.8H6.2V10.2H5.1L7 13L8.9 10.2H7.8V7.8H10.2V8.9L13 7L10.2 5.1V6.2H7.8V3.8H8.9Z"/></svg></div>
+          <div class="skey">move</div><div class="sdsc">pan the source tile</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg class="a-sc" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><rect x="1" y="1" width="8" height="12" rx="4" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="4" y="4" width="2" height="4" rx="1"/></svg></div>
+          <div class="skey-r">scroll</div><div class="sdsc">zoom tile in / out</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg class="a-c1" width="10" height="14" viewBox="0 0 10 14" fill="currentColor"><path d="M1 1L1 11.5L3.8 9L5.6 13.2L7.2 12.5L5.4 8.2L9.5 8.2Z"/></svg></div>
+          <div class="skey">click</div><div class="sdsc">next pattern</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg class="a-c2" width="12" height="14" viewBox="0 0 12 14" fill="none" opacity=".7"><path d="M1 1L1 11.5L3.8 9L5.6 13.2L7.2 12.5L5.4 8.2L9.5 8.2Z" fill="currentColor"/><circle cx="10" cy="2" r="1.5" fill="currentColor" opacity=".5"/><circle cx="10" cy="5.5" r="1.5" fill="currentColor" opacity=".5"/></svg></div>
+          <div class="skey-r">double click</div><div class="sdsc">previous pattern</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="14" height="9" viewBox="0 0 14 9" fill="currentColor" opacity=".36"><rect x="0" y="0" width="6" height="6" rx="1.2"/><rect x="8" y="0" width="6" height="6" rx="1.2"/></svg></div>
+          <div class="skey">1 – 8</div><div class="sdsc">select pattern</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="14" height="9" viewBox="0 0 14 9" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36" stroke-linecap="round"><line x1="3" y1="4.5" x2="0.5" y2="4.5"/><line x1="0.5" y1="2.5" x2="0.5" y2="6.5"/><line x1="7" y1="4.5" x2="13.5" y2="4.5"/><line x1="13.5" y1="2.5" x2="13.5" y2="6.5"/></svg></div>
+          <div class="skey-r">– / =</div><div class="sdsc">zoom out / in</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="14" height="13" viewBox="0 0 14 13" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><rect x="1" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M1 8L4 5.5L6.5 8L9 6L13 9.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10.5" cy="5" r="1.2" fill="currentColor" stroke="none" opacity=".36"/></svg></div>
+          <div class="skey">0</div><div class="sdsc">load new image</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="14" height="11" viewBox="0 0 14 11" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><rect x="1" y="1.5" width="8" height="8" rx="1.5"/><path d="M9 4.5L13 2.5V8.5L9 6.5" stroke-linejoin="round"/></svg></div>
+          <div class="skey-r">`</div><div class="sdsc">generate a 15s video</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><circle cx="6.5" cy="6.5" r="5"/><line x1="6.5" y1="4" x2="6.5" y2="7" stroke-linecap="round"/><circle cx="6.5" cy="9" r=".7" fill="currentColor" stroke="none"/></svg></div>
+          <div class="skey">9</div><div class="sdsc">show this screen</div>
+        </div>
+
+        <div class="srow cta">
+          <div class="cta-phrase">
+            <span class="cta-word">hit</span>
+            <div class="skey-r">↵ enter</div>
+            <span class="cta-word">to begin</span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /.sck -->
+
+    <!-- ── TOUCH (coarse-pointer devices) ── -->
+    <div class="sct">
+      <div class="sgrid">
+
+        <div class="srow">
+          <div class="sico"><svg class="a-mv" width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 1L5.1 3.8H6.2V6.2H3.8V5.1L1 7L3.8 8.9V7.8H6.2V10.2H5.1L7 13L8.9 10.2H7.8V7.8H10.2V8.9L13 7L10.2 5.1V6.2H7.8V3.8H8.9Z"/></svg></div>
+          <div class="skey">drag</div><div class="sdsc">pan the source tile</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><div class="a-pn" style="font-size:11px;color:var(--ov-dim);line-height:1">⟨ ⟩</div></div>
+          <div class="skey">pinch</div><div class="sdsc">zoom tile in / out</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg class="a-tp" width="13" height="13" viewBox="0 0 13 13" fill="currentColor"><circle cx="6.5" cy="6.5" r="3.5"/><circle cx="6.5" cy="6.5" r="5.8" fill="none" stroke="currentColor" stroke-width="1" opacity=".3"/></svg></div>
+          <div class="skey">tap</div><div class="sdsc">next pattern</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg class="a-dt" width="13" height="13" viewBox="0 0 13 13" fill="currentColor"><circle cx="6.5" cy="6.5" r="3.5"/><circle cx="6.5" cy="6.5" r="5.8" fill="none" stroke="currentColor" stroke-width="1" opacity=".3"/></svg></div>
+          <div class="skey">double tap</div><div class="sdsc">previous pattern</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="13" height="8" viewBox="0 0 13 8" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><rect x="0.5" y="0.5" width="12" height="7" rx="3.5"/><line x1="4.5" y1="0.5" x2="4.5" y2="7.5"/><line x1="8.5" y1="0.5" x2="8.5" y2="7.5"/></svg></div>
+          <div class="skey">buttons</div><div class="sdsc">select pattern</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="14" height="11" viewBox="0 0 14 11" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><rect x="1" y="1.5" width="8" height="8" rx="1.5"/><path d="M9 4.5L13 2.5V8.5L9 6.5" stroke-linejoin="round"/></svg></div>
+          <div class="skey">tap save</div><div class="sdsc">generate a 15s video</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><circle cx="6.5" cy="6.5" r="5"/><line x1="6.5" y1="4" x2="6.5" y2="7" stroke-linecap="round"/><circle cx="6.5" cy="9" r=".7" fill="currentColor" stroke="none"/></svg></div>
+          <div class="skey">tap ?</div><div class="sdsc">show this screen</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico"><svg width="14" height="13" viewBox="0 0 14 13" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".36"><rect x="1" y="2.5" width="12" height="8.5" rx="1.5"/><path d="M1 8L4 5.5L6.5 8L9 6L13 9.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10.5" cy="5" r="1.2" fill="currentColor" stroke="none" opacity=".36"/></svg></div>
+          <div class="skey">tap new</div><div class="sdsc">load image</div>
+        </div>
+
+        <div class="srow">
+          <div class="sico" style="opacity:.4;font-size:13px;color:var(--ov-dim)">◈</div>
+          <div class="skey">explore</div><div class="sdsc">move cursor over image</div>
+        </div>
+
+        <div class="srow cta">
+          <div class="cta-phrase">
+            <span class="cta-word">tap anywhere to begin</span>
+            <span class="blink-dot"></span>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /.sct -->
+
+  </div>
+</div><!-- /#spl -->
+
+<div id="dot"></div>
+<input type="file" id="fi" accept="image/*" style="display:none">
+
+<!-- ══════════════ VERTEX SHADER ══════════════ -->
+<script id="vs" type="x-shader/x-vertex">
+attribute vec2 aPos;
+void main(){gl_Position=vec4(aPos,0.,1.);}
+</script>
+
+<!-- ══════════════ FRAGMENT SHADER ══════════ -->
+<script id="fs" type="x-shader/x-fragment">
+precision highp float;
+uniform sampler2D uBg;
+uniform vec2  uRes;
+uniform vec2  uCurGL;
+uniform float uRadius;
+uniform float uTile;
+uniform vec2  uCS;   /* cover-fit scale — used for isotropic tile sampling */
+uniform vec2  uBCS;  /* contain-fit scale — used only for background display */
+uniform vec2  uCurUV;
+uniform vec3  uParA;
+uniform vec3  uParB;
+uniform float uT;
+uniform int   uHas;
+uniform int   uRecMode;
+uniform vec4  uRect;
+
+const float PI=3.14159265359;
+const float TAU=6.28318530718;
+const float E=2.71828182846;
+
+vec2 fold(vec3 par,float r,float theta){
+  float n=par.x,tw=par.y,lr=par.z;
+  float sec=TAU/n;
+  float rn=clamp(r/uRadius,0.,1.);
+  float th=theta+tw*rn*PI*.5;
+  float t=mod(th,sec);
+  if(t>sec*.5)t=sec-t;
+  return vec2(mix(rn,log(1.+rn*(E-1.)),lr),t);
+}
+vec4 sCA(vec2 uv,float a){
+  uv=clamp(uv,.001,.999);
+  if(a<4e-4)return texture2D(uBg,uv);
+  vec2 d=normalize(uv-vec2(.5))*a;
+  return vec4(
+    texture2D(uBg,clamp(uv+d,.001,.999)).r,
+    texture2D(uBg,uv).g,
+    texture2D(uBg,clamp(uv-d,.001,.999)).b,1.);
+}
+void main(){
+  vec2 fxy=gl_FragCoord.xy;
+  vec2 raw=fxy/uRes;
+
+  /* Contain-fit background: uBCS expands UV range so full image fits, letterboxing outside */
+  vec2 bgUV0=vec2(.5+(raw.x-.5)*uBCS.x,.5+((1.-raw.y)-.5)*uBCS.y);
+  float inImg=step(.0,bgUV0.x)*step(bgUV0.x,1.)*step(.0,bgUV0.y)*step(bgUV0.y,1.);
+  vec2 bgUV=clamp(bgUV0,.001,.999);
+
+  if(uHas==0){
+    /* Light checker for no-image state */
+    float g=mod(floor(fxy.x/52.)+floor(fxy.y/52.),2.);
+    gl_FragColor=vec4(.88+g*.04,.88+g*.04,.90+g*.04,1.);
+    return;
+  }
+
+  /* Letterbox = light background color; image = dimmed 32% */
+  vec4 imgPx =vec4(texture2D(uBg,bgUV).rgb*.32,1.);
+  vec4 lbPx  =vec4(.962,.961,.965,1.); /* matches #f5f5f7 */
+  vec4 bgD   =mix(lbPx,imgPx,inImg);
+
+  vec2 off=fxy-uCurGL;
+  float r=length(off),th=atan(off.y,off.x);
+  vec3 par=mix(uParA,uParB,uT);
+  vec2 fd=fold(par,r,th);
+  vec2 suv=uCurUV+fd.x*vec2(cos(fd.y),-sin(fd.y))*(uTile/uRes)*uCS;
+  float rim=smoothstep(.3,1.,r/max(uRadius-22.,1.));
+  vec4 kc=sCA(suv,rim*.007);
+
+  if(uRecMode==0){
+    float bW=24.,ed=uRadius-r;
+    float inC=smoothstep(-3.,3.,ed);
+    float inK=smoothstep(-3.,3.,ed-bW);
+    vec4 col=bgD;
+    col=mix(col,vec4(0.,0.,0.,1.),inC*(1.-inK));
+    col=mix(col,kc,inK);
+    gl_FragColor=col;
+  }else{
+    float dx=min(fxy.x-uRect.x,uRect.z-fxy.x);
+    float dy=min(fxy.y-uRect.y,uRect.w-fxy.y);
+    float d=min(dx,dy),bW=18.;
+    float inF=smoothstep(-2.,2.,d);
+    float inK2=smoothstep(-2.,2.,d-bW);
+    vec4 col=bgD;
+    col=mix(col,vec4(0.,0.,0.,1.),inF*(1.-inK2));
+    col=mix(col,kc,inK2);
+    gl_FragColor=col;
+  }
+}
+</script>
+
+<!-- ══════════════ JAVASCRIPT ════════════════ -->
+<script>
+'use strict';
+
+const TAU=Math.PI*2;
+const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+const c01=v=>clamp(v,.01,.99);
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const rand=()=>Math.random();
+const rng=(a,b)=>a+(b-a)*rand();
+
+/* ── 8 Patterns ── */
+const PAT=[
+  {name:'reflect', sub:'d2',  n:2,  twist:0.00, logR:0.00},
+  {name:'trinity', sub:'d3',  n:3,  twist:0.00, logR:0.00},
+  {name:'compass', sub:'d4',  n:4,  twist:0.00, logR:0.00},
+  {name:'crystal', sub:'d6',  n:6,  twist:0.00, logR:0.00},
+  {name:'spiral',  sub:'d6↺', n:6,  twist:0.55, logR:0.00},
+  {name:'lotus',   sub:'d8',  n:8,  twist:0.10, logR:0.60},
+  {name:'portal',  sub:'d12', n:12, twist:0.00, logR:1.00},
+  {name:'cosmos',  sub:'d5↺', n:5,  twist:0.42, logR:0.75},
+];
+
+/* ── Build pill ── */
+const pill=document.getElementById('pill');
+PAT.forEach((p,i)=>{
+  const b=document.createElement('button');
+  b.className='pb'+(i===0?' on':'');
+  b.dataset.idx=i;
+  b.innerHTML=`${p.name}&thinsp;<span class="psub">${p.sub}</span>&thinsp;<span class="kbk">[${i+1}]</span>`;
+  b.addEventListener('click',e=>{e.stopPropagation();switchTo(i);});
+  pill.appendChild(b);
+});
+
+/* ── WebGL setup ── */
+const canvas=document.getElementById('c');
+const gl=canvas.getContext('webgl',{antialias:true,preserveDrawingBuffer:true})
+        ||canvas.getContext('experimental-webgl',{antialias:true,preserveDrawingBuffer:true});
+function mkS(t,s){
+  const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);
+  if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(sh));
+  return sh;
+}
+const prog=gl.createProgram();
+gl.attachShader(prog,mkS(gl.VERTEX_SHADER,  document.getElementById('vs').textContent));
+gl.attachShader(prog,mkS(gl.FRAGMENT_SHADER,document.getElementById('fs').textContent));
+gl.linkProgram(prog);gl.useProgram(prog);
+gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const aL=gl.getAttribLocation(prog,'aPos');
+gl.enableVertexAttribArray(aL);gl.vertexAttribPointer(aL,2,gl.FLOAT,false,0,0);
+const tex=gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D,tex);
+[gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,p,gl.CLAMP_TO_EDGE));
+[gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER].forEach(p=>gl.texParameteri(gl.TEXTURE_2D,p,gl.LINEAR));
+gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
+const U={};
+['uBg','uRes','uCurGL','uRadius','uTile','uCS','uBCS','uCurUV','uParA','uParB','uT','uHas','uRecMode','uRect']
+  .forEach(n=>U[n]=gl.getUniformLocation(prog,n));
+
+/* ── App state ── */
+let W=0,H=0,cRect=null;
+let mx=0,my=0,sx=0,sy=0,tx=0,ty=0,isTouchActive=false;
+let tile=80,hasImg=false,imgAsp=1,csx=1,csy=1,bsx=1,bsy=1;
+let curP=0,tgtP=0,trans=0,inT=false,tStart=0;
+const TDUR=2600;
+
+/* Tile tweening */
+let tileTweenFrom=80,tileTweenTo=80,tileTweenStart=0;
+const TILE_DUR=2200;
+let tileAnimating=false;
+
+/* ── Recording state ── */
+let isRec=false,recT0=0;
+let mediaRec=null,recChunks=[];
+let recPatSched=[],recPatIdx=0;
+let recZoomSched=[],recZoomIdx=0;
+let recTimerId=null;
+let recPathFn=null,recPathName='';
+const REC_DUR=15; /* 15-second video */
+
+/* Offscreen capture canvas — records ONLY the mini-screen content */
+const capCanvas=document.createElement('canvas');
+capCanvas.width=3840;capCanvas.height=2160;
+const capCtx=capCanvas.getContext('2d');
+
+function getMiniRect(){
+  const bW=18;
+  return{
+    sx:Math.round(W*0.2+bW),
+    sy:Math.round(H*0.2+bW),
+    sw:Math.round(W*0.6-bW*2),
+    sh:Math.round(H*0.6-bW*2)
+  };
+}
+function blitToCapture(){
+  const{sx,sy,sw,sh}=getMiniRect();
+  capCtx.drawImage(canvas,sx,sy,sw,sh,0,0,3840,2160);
+}
+
+/* ── Resize ── */
+function resize(){
+  cRect=document.getElementById('cwrap').getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  W=Math.round(cRect.width*dpr);H=Math.round(cRect.height*dpr);
+  canvas.width=W;canvas.height=H;
+  gl.viewport(0,0,W,H);
+  tx=cRect.left+cRect.width/2;ty=cRect.top+cRect.height/2;
+  sx=mx=tx;sy=my=ty;
+  computeCS();
+}
+
+/* cover-fit  (csx/csy ≤1): shrinks the axis that doesn't fill → isotropic tile circle
+   contain-fit (bsx/bsy ≥1): expands so full image shows, letterbox on the other axis */
+function computeCS(){
+  if(!hasImg){csx=1;csy=1;bsx=1;bsy=1;return;}
+  const ca=W/H;
+  if(imgAsp>ca){
+    csx=ca/imgAsp; csy=1;        // cover: wide → fit height, crop sides
+    bsx=1;         bsy=imgAsp/ca; // contain: wide → full width, letterbox top/bottom
+  }else{
+    csx=1;         csy=imgAsp/ca; // cover: tall → fit width, crop top/bottom
+    bsx=ca/imgAsp; bsy=1;         // contain: tall → full height, letterbox sides
+  }
+}
+
+function loadImg(src){
+  const img=new Image();
+  img.onload=()=>{
+    imgAsp=img.width/img.height;computeCS();
+    gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+    hasImg=true;
+    document.getElementById('dz').classList.add('gone');
+  };img.src=src;
+}
+function readFile(f){const r=new FileReader();r.onload=e=>loadImg(e.target.result);r.readAsDataURL(f);}
+
+/* ── Pattern switching ── */
+function updateBtns(){document.querySelectorAll('.pb').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.idx)===tgtP));}
+function switchTo(p){
+  if(p===tgtP)return;
+  if(inT){curP=tgtP;trans=0;inT=false;}
+  tgtP=p;trans=0;inT=true;tStart=performance.now();
+  updateBtns();
+}
+function nextP(){switchTo((tgtP+1)%PAT.length);}
+function prevP(){switchTo((tgtP-1+PAT.length)%PAT.length);}
+
+let clickPend=null;
+function handleClick(e){
+  e.stopPropagation();
+  if(clickPend!==null){clearTimeout(clickPend);clickPend=null;prevP();}
+  else clickPend=setTimeout(()=>{clickPend=null;nextP();},280);
+}
+let tapPend=null;
+function handleTap(){
+  if(tapPend!==null){clearTimeout(tapPend);tapPend=null;prevP();}
+  else tapPend=setTimeout(()=>{tapPend=null;nextP();},280);
+}
+
+/* ════════════════════════════════════════════
+   RECORDING PATHS  (t ∈ [0,1] over 15 s)
+   ════════════════════════════════════════════ */
+
+function makeSerpentine(){
+  const startRow=rng(0,6.5),startDir=Math.floor(rand()*2);
+  return{name:'serpentine',fn(t){
+    const ROWS=10,speed=0.18;
+    const eff=startRow+t*ROWS*speed;
+    const row=Math.floor(eff),f=eff-row;
+    const goRight=((row+startDir)%2===0);
+    return{x:c01(goRight?f:1-f),y:c01(eff/ROWS)};
+  }};
+}
+function makeSpiralIn(){
+  const cx=rng(.3,.7),cy=rng(.3,.7),a0=rand()*TAU,turns=rng(1.2,2);
+  return{name:'spiral in',fn(t){
+    const a=a0+t*turns*TAU,r=0.22*(1-t);
+    return{x:c01(cx+r*Math.cos(a)),y:c01(cy+r*Math.sin(a))};
+  }};
+}
+function makeSpiralOut(){
+  const cx=rng(.3,.7),cy=rng(.3,.7),a0=rand()*TAU,turns=rng(1.2,2);
+  return{name:'spiral out',fn(t){
+    const a=a0+t*turns*TAU,r=0.22*t;
+    return{x:c01(cx+r*Math.cos(a)),y:c01(cy+r*Math.sin(a))};
+  }};
+}
+function makeLissajous23(){
+  const cx=rng(.38,.62),cy=rng(.38,.62),d=rand()*Math.PI,rx=rng(.11,.17),ry=rng(.09,.14);
+  return{name:'lissajous 2:3',fn(t){
+    return{x:c01(cx+rx*Math.sin(2*t*TAU+d)),y:c01(cy+ry*Math.sin(3*t*TAU))};
+  }};
+}
+function makeLissajous34(){
+  const cx=rng(.38,.62),cy=rng(.38,.62),d=rand()*Math.PI,r=rng(.09,.14);
+  return{name:'lissajous 3:4',fn(t){
+    return{x:c01(cx+r*Math.sin(3*t*TAU+d)),y:c01(cy+r*Math.sin(4*t*TAU))};
+  }};
+}
+function makeOrbit(){
+  const cx=rng(.3,.7),cy=rng(.3,.7),r=rng(.06,.13);
+  const loops=rng(1.5,2.8),a0=rand()*TAU;
+  const driftX=rng(-.10,.10),driftY=rng(-.10,.10);
+  return{name:'orbit',fn(t){
+    const a=a0+t*loops*TAU;
+    return{x:c01(cx+driftX*t+r*Math.cos(a)),y:c01(cy+driftY*t+r*Math.sin(a))};
+  }};
+}
+function makeFigure8(){
+  const cx=rng(.35,.65),cy=rng(.35,.65),scale=rng(.09,.16);
+  const loops=1+Math.floor(rand()*2),a0=rand()*TAU;
+  return{name:'figure 8',fn(t){
+    const a=a0+t*loops*TAU;
+    return{x:c01(cx+scale*Math.sin(a)),y:c01(cy+scale*.5*Math.sin(2*a))};
+  }};
+}
+function makeDrift(){
+  const cx=rng(.35,.65),cy=rng(.35,.65);
+  const comps=[
+    {fx:.17,fy:.13,ax:rng(.05,.09),ay:rng(.04,.08),phx:rand()*TAU,phy:rand()*TAU},
+    {fx:.29,fy:.34,ax:rng(.02,.05),ay:rng(.02,.04),phx:rand()*TAU,phy:rand()*TAU},
+    {fx:.48,fy:.41,ax:rng(.01,.02),ay:rng(.01,.02),phx:rand()*TAU,phy:rand()*TAU},
+  ];
+  return{name:'drift',fn(t){
+    let x=0,y=0;
+    comps.forEach(c=>{x+=c.ax*Math.sin(c.fx*t*TAU+c.phx);y+=c.ay*Math.sin(c.fy*t*TAU+c.phy);});
+    return{x:c01(cx+x),y:c01(cy+y)};
+  }};
+}
+function makeRose(){
+  const cx=rng(.35,.65),cy=rng(.35,.65),k=2+Math.floor(rand()*3);
+  const scale=rng(.10,.17),loops=rng(0.9,1.8),a0=rand()*TAU;
+  return{name:`rose ${k}`,fn(t){
+    const a=a0+t*loops*TAU,r=scale*Math.cos(k*a);
+    return{x:c01(cx+r*Math.cos(a)),y:c01(cy+r*Math.sin(a))};
+  }};
+}
+function makeHypotrochoid(){
+  const cx=rng(.35,.65),cy=rng(.35,.65),R=rng(.09,.15);
+  const r=R*rng(.3,.7),d=r*rng(.6,1.2),loops=rng(1.1,2),a0=rand()*TAU;
+  return{name:'spirograph',fn(t){
+    const a=a0+t*loops*TAU;
+    return{x:c01(cx+(R-r)*Math.cos(a)+d*Math.cos((R-r)/r*a)),y:c01(cy+(R-r)*Math.sin(a)-d*Math.sin((R-r)/r*a))};
+  }};
+}
+function buildPath(){
+  const makers=[makeSerpentine,makeSpiralIn,makeSpiralOut,makeLissajous23,makeLissajous34,makeOrbit,makeFigure8,makeDrift,makeRose,makeHypotrochoid];
+  return makers[Math.floor(rand()*makers.length)]();
+}
+
+/* ── Zoom schedule (scaled for 15s) ── */
+function makeZoomSchedule(patSched){
+  const base=tile,sched=[];
+  patSched.forEach(ps=>{
+    if(rand()<.75)sched.push({at:ps.at,tile:clamp(base*rng(.35,1.85),14,280)});
+  });
+  [4,8,12].forEach(s=>{
+    const ms=s*1000;
+    if(!sched.find(z=>Math.abs(z.at-ms)<3000))
+      sched.push({at:ms,tile:clamp(base*rng(.35,1.85),14,280)});
+  });
+  sched.sort((a,b)=>a.at-b.at);
+  return sched;
+}
+
+/* ── Recording ── */
+function startRec(){
+  if(!hasImg){alert('load an image first');return;}
+  if(isRec){stopRec();return;}
+  isRec=true;recT0=performance.now();recPatIdx=0;recZoomIdx=0;
+
+  const p=buildPath();
+  recPathFn=p.fn;recPathName=p.name;
+  document.getElementById('rec-path').textContent=p.name;
+
+  recPatSched=[];let last=tgtP;
+  [3,6,9,12].forEach(s=>{
+    let np;do{np=Math.floor(rand()*PAT.length);}while(np===last);
+    recPatSched.push({at:s*1000,p:np});last=np;
+  });
+
+  recZoomSched=makeZoomSchedule(recPatSched);
+  tileTweenFrom=tile;tileTweenTo=tile;tileAnimating=false;
+
+  try{
+    const stream=capCanvas.captureStream(30);
+    const mime=['video/webm;codecs=vp9','video/webm','video/mp4']
+      .find(m=>MediaRecorder.isTypeSupported(m))||'video/webm';
+    mediaRec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000});
+    recChunks=[];
+    mediaRec.ondataavailable=e=>{if(e.data.size>0)recChunks.push(e.data);};
+    mediaRec.onstop=()=>{
+      const blob=new Blob(recChunks,{type:mediaRec.mimeType});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download='kaleidoscopic.webm';a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),5000);
+    };
+    mediaRec.start(200);
+  }catch(err){console.error('MediaRecorder:',err);isRec=false;return;}
+
+  document.getElementById('btnSave').classList.add('rec');
+  document.getElementById('rec-hud').classList.add('vis');
+  recTimerId=setInterval(recTick,400);recTick();
+
+  const fill=document.getElementById('rec-fill');
+  fill.style.transition='none';fill.style.width='0%';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    fill.style.transition=`width ${REC_DUR}s linear`;fill.style.width='100%';
+  }));
+}
+
+function recTick(){
+  const elapsed=(performance.now()-recT0)/1000;
+  const rem=Math.max(0,REC_DUR-elapsed);
+  const m=Math.floor(rem/60),s=Math.floor(rem%60);
+  document.getElementById('rec-lbl').textContent=`● ${m}:${String(s).padStart(2,'0')}`;
+  if(rem<=0)stopRec();
+}
+function stopRec(){
+  if(!isRec)return;
+  isRec=false;
+  if(mediaRec&&mediaRec.state!=='inactive')mediaRec.stop();
+  clearInterval(recTimerId);
+  document.getElementById('btnSave').classList.remove('rec');
+  document.getElementById('rec-hud').classList.remove('vis');
+  const fill=document.getElementById('rec-fill');
+  fill.style.transition='none';fill.style.width='0%';
+}
+
+/* ── Keyboard ── */
+document.addEventListener('keydown',e=>{
+  if(e.repeat)return;
+  if(e.key==='Enter'){
+    const s=document.getElementById('spl');
+    if(!s.classList.contains('gone')){s.classList.add('gone');if(!hasImg)document.getElementById('fi').click();}
+    return;
+  }
+  if(e.key==='`'){isRec?stopRec():startRec();return;}
+  if(e.key==='0'){document.getElementById('fi').click();return;}
+  if(e.key==='9'){document.getElementById('spl').classList.toggle('gone');return;}
+  if(e.key==='-'||e.key==='_'){tile=Math.max(6,tile*.88);return;}
+  if(e.key==='='||e.key==='+'){tile=Math.min(600,tile*1.14);return;}
+  const n=parseInt(e.key);
+  if(!isNaN(n)&&n>=1&&n<=8)switchTo(n-1);
+});
+
+/* ── Mouse ── */
+const dot=document.getElementById('dot');
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  isTouchActive=false;
+});
+window.addEventListener('wheel',e=>{
+  e.preventDefault();tile*=Math.pow(0.999,e.deltaY);tile=Math.max(6,Math.min(600,tile));
+},{passive:false});
+canvas.addEventListener('click',handleClick);
+
+/* ── Touch ── */
+let pinchD0=null,pinchT0=null,touchMoved=false;
+function tCenter(tl){
+  if(tl.length===1)return{x:tl[0].clientX,y:tl[0].clientY};
+  return{x:(tl[0].clientX+tl[1].clientX)/2,y:(tl[0].clientY+tl[1].clientY)/2};
+}
+function tDist(tl){
+  const dx=tl[0].clientX-tl[1].clientX,dy=tl[0].clientY-tl[1].clientY;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();isTouchActive=true;touchMoved=false;
+  const c=tCenter(e.touches);tx=c.x;ty=c.y;sx=tx;sy=ty;
+  if(e.touches.length===2){pinchD0=tDist(e.touches);pinchT0=tile;}
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();touchMoved=true;
+  const c=tCenter(e.touches);tx=c.x;ty=c.y;
+  if(e.touches.length===2&&pinchD0!==null)
+    tile=Math.max(6,Math.min(600,pinchT0*(pinchD0/tDist(e.touches))));
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();pinchD0=null;
+  if(!touchMoved&&e.changedTouches.length===1)handleTap();
+},{passive:false});
+
+/* ── Buttons ── */
+document.getElementById('btnNew').addEventListener('click',e=>{e.stopPropagation();document.getElementById('fi').click();});
+document.getElementById('btnHelp').addEventListener('click',e=>{e.stopPropagation();document.getElementById('spl').classList.toggle('gone');});
+document.getElementById('btnSave').addEventListener('click',e=>{e.stopPropagation();isRec?stopRec():startRec();});
+
+/* ── Drop zone ── */
+const dz=document.getElementById('dz');
+dz.addEventListener('click',()=>document.getElementById('fi').click());
+document.getElementById('fi').addEventListener('change',e=>{
+  if(e.target.files[0])readFile(e.target.files[0]);e.target.value='';
+});
+document.addEventListener('dragover',e=>{
+  e.preventDefault();dz.classList.remove('gone');dz.classList.add('drag');
+});
+document.addEventListener('dragleave',e=>{
+  if(e.clientX<=0||e.clientX>=innerWidth||e.clientY<=0||e.clientY>=innerHeight){
+    if(hasImg)dz.classList.add('gone');dz.classList.remove('drag');
+  }
+});
+document.addEventListener('drop',e=>{
+  e.preventDefault();dz.classList.add('gone');dz.classList.remove('drag');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.type.startsWith('image/'))readFile(f);
+});
+
+/* ── Splash ── */
+function dismissSplash(){
+  document.getElementById('spl').classList.add('gone');
+  if(!hasImg)document.getElementById('fi').click();
+}
+document.getElementById('spl').addEventListener('click',dismissSplash);
+document.getElementById('spl-inner').addEventListener('click',e=>e.stopPropagation());
+
+/* ── Render loop ── */
+function frame(ts){
+  if(isTouchActive){sx=lerp(sx,tx,.14);sy=lerp(sy,ty,.14);}
+  else             {sx=lerp(sx,mx,.10);sy=lerp(sy,my,.10);}
+
+  if(inT){
+    const raw=Math.min(1.,(ts-tStart)/TDUR);trans=ease(raw);
+    if(raw>=1.){inT=false;curP=tgtP;trans=0;}
+  }
+
+  const rect=cRect||document.getElementById('cwrap').getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  let curGL_x,curGL_y,curUV_x,curUV_y,recMode=0;
+  let rectX0=0,rectY0=0,rectX1=W,rectY1=H,radius=Math.min(W,H)*.22;
+  let renderTile=tile;
+
+  if(isRec){
+    const elapsed=performance.now()-recT0;
+
+    while(recPatIdx<recPatSched.length&&elapsed>=recPatSched[recPatIdx].at){
+      switchTo(recPatSched[recPatIdx].p);recPatIdx++;
+    }
+    while(recZoomIdx<recZoomSched.length&&elapsed>=recZoomSched[recZoomIdx].at){
+      tileTweenFrom=renderTile;
+      tileTweenTo=recZoomSched[recZoomIdx].tile;
+      tileTweenStart=performance.now();
+      tileAnimating=true;recZoomIdx++;
+    }
+    if(tileAnimating){
+      const zt=Math.min(1.,(performance.now()-tileTweenStart)/TILE_DUR);
+      renderTile=lerp(tileTweenFrom,tileTweenTo,ease(zt));
+      if(zt>=1.){tileAnimating=false;tileTweenFrom=tileTweenTo;}
+    }
+
+    const t=Math.min(1.,elapsed/1000/REC_DUR);
+    const{x:px,y:py}=recPathFn(t);
+    curUV_x=0.5+(px-.5)*bsx;
+    curUV_y=0.5+(py-.5)*bsy;
+
+    const hw=W*.3,hh=H*.3;
+    rectX0=W*.5-hw;rectY0=H*.5-hh;
+    rectX1=W*.5+hw;rectY1=H*.5+hh;
+    curGL_x=W*.5;curGL_y=H*.5;
+    radius=Math.hypot(hw,hh);
+    recMode=1;
+
+    if(elapsed/1000>=REC_DUR)stopRec();
+
+  }else{
+    const bx=(sx-rect.left)*dpr*(W/(rect.width*dpr));
+    const by=(sy-rect.top)*dpr*(H/(rect.height*dpr));
+    curGL_x=bx;curGL_y=H-by;
+    const uvx=(sx-rect.left)/rect.width;
+    const uvy=(sy-rect.top)/rect.height;
+    curUV_x=0.5+(uvx-.5)*bsx;
+    curUV_y=0.5+(uvy-.5)*bsy;
+    recMode=0;
+  }
+
+  const pA=PAT[curP],pB=PAT[tgtP];
+  gl.uniform1i(U.uBg,    0);
+  gl.uniform2f(U.uRes,   W,H);
+  gl.uniform2f(U.uCurGL, curGL_x,curGL_y);
+  gl.uniform1f(U.uRadius,radius);
+  gl.uniform1f(U.uTile,  renderTile);
+  gl.uniform2f(U.uCS,    csx,csy);
+  gl.uniform2f(U.uBCS,   bsx,bsy);
+  gl.uniform2f(U.uCurUV, curUV_x,curUV_y);
+  gl.uniform3f(U.uParA,  pA.n,pA.twist,pA.logR);
+  gl.uniform3f(U.uParB,  pB.n,pB.twist,pB.logR);
+  gl.uniform1f(U.uT,     trans);
+  gl.uniform1i(U.uHas,   hasImg?1:0);
+  gl.uniform1i(U.uRecMode,recMode);
+  gl.uniform4f(U.uRect,  rectX0,rectY0,rectX1,rectY1);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+  if(isRec)blitToCapture();
+  requestAnimationFrame(frame);
+}
+
+new ResizeObserver(resize).observe(document.getElementById('cwrap'));
+window.addEventListener('resize',resize);
+resize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
